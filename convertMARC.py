@@ -1,4 +1,4 @@
-import pymarc, os, subprocess, time, datetime
+import pymarc, os, subprocess, time, datetime, sys, glob
 import postConversionTransform
 from datetime import timedelta
 
@@ -22,6 +22,12 @@ def readFile(filename,output_writer):
 		for line in read_file:
 			convertJSONToMARCXML(line,output_writer)
 
+def getFolder(read_folder_name):
+    output_folder_name = read_folder_name
+    if not os.path.isdir(output_folder_name):
+        os.mkdir(output_folder_name)
+    return output_folder_name
+
 def makeOutputFolder(folder_name,counter):
 	try:
 		if counter is not None:
@@ -37,37 +43,59 @@ def makeOutputFolder(folder_name,counter):
 		else:
 			return makeOutputFolder(folder_name,0)
 
-def traverseFiles():
-	rootdir = 'sample_starting_records'
-	results_folder, results_folder_name = makeOutputFolder('XML_records',None)
-	bibf_results_folder, bibf_results_folder_name = makeOutputFolder('BIBF_records',None)
+def traverseFiles(rootdir):
+	print(rootdir)
+#	rootdir = 'sample_starting_records'
+	results_folder_name = getFolder(rootdir + '_XML_records/')
+	bibf_results_folder_name = getFolder(rootdir + '_BIBF_records/')
+
+	newest_bibf_file = ''
+	try:
+		newest_bibf_file = max(glob.glob(bibf_results_folder_name + '*'), key=os.path.getctime)
+		print(newest_bibf_file)
+		restart_file = newest_bibf_file[newest_bibf_file.find('BIBF_')+5:-4]
+	except:
+		pass
+
+	if newest_bibf_file:
+		waiting = True
+	else:
+		waiting = False
 
 	for root, dirs, files in os.walk(rootdir):
 		for name in files:
-			if name[0] != '.':
-				print("Starting output writer")
-				output_writer = pymarc.XMLWriter(open(results_folder_name + SLASH + name[:name.rfind('.')] + '.xml','wb'))
-				print("Opening file")
-				readFile(rootdir + SLASH + name,output_writer)
-				output_writer.close()
+			if waiting:
+				print(name,restart_file)
+				if name == restart_file:
+					waiting = False
 
-				print("Opening output file")
-				bibf_output = open(bibf_results_folder_name + SLASH + 'BIBF_' + name[:name.rfind('.')] + '.xml','w')
-				print("Running bash script")
-				bashCommand = 'xsltproc marc2bibframe2/xsl/marc2bibframe2.xsl ' + results_folder_name + SLASH + name[:name.rfind('.')] + '.xml'
-				process = subprocess.call(bashCommand.split(), stdout=bibf_output)
-#				ps = subprocess.Popen(['xsltproc', 'marc2bibframe2/xsl/marc2bibframe2.xsl'], stdout=subprocess.PIPE)
-#				print("Ran first half")
-#				output = subprocess.call(['python', 'postConversionTransform.py', results_folder_name + SLASH + name[:name.rfind('.')] + '.xml'], stdin=ps.stdout)#, stdout=bibf_output)
-				print("Converted " + name)
-				postConversionTransform.postConversionTransform(bibf_results_folder_name + SLASH + 'BIBF_' + name[:name.rfind('.')] + '.xml')
+			if not waiting:		
+				if name[0] != '.':
+					start_time = datetime.datetime.now().time()
+
+					print("Starting output writer")
+					output_writer = pymarc.XMLWriter(open(results_folder_name + SLASH + name + '.xml','wb'))
+					print("Opening file")
+					readFile(rootdir + SLASH + name,output_writer)
+					output_writer.close()
+
+					print("Opening output file")
+					bibf_output = open(bibf_results_folder_name + SLASH + 'BIBF_' + name + '.xml','w')
+					print("Running bash script")
+					bashCommand = 'xsltproc marc2bibframe2/xsl/marc2bibframe2.xsl ' + results_folder_name + SLASH + name + '.xml'
+					process = subprocess.call(bashCommand.split(), stdout=bibf_output)
+	#				ps = subprocess.Popen(['xsltproc', 'marc2bibframe2/xsl/marc2bibframe2.xsl'], stdout=subprocess.PIPE)
+	#				print("Ran first half")
+	#				output = subprocess.call(['python', 'postConversionTransform.py', results_folder_name + SLASH + name + '.xml'], stdin=ps.stdout)#, stdout=bibf_output)
+					print("Converted " + name)
+					postConversionTransform.postConversionTransform(bibf_results_folder_name + SLASH + 'BIBF_' + name + '.xml')
+
+					end_time = datetime.datetime.now().time()
+					print("Start time: " + str(start_time))
+					print("End time: " + str(end_time))
+					print("Run duration: " + str(datetime.datetime.combine(datetime.date.min,end_time)-datetime.datetime.combine(datetime.date.min,start_time)))
 
 def main():
-	start_time = datetime.datetime.now().time()
-	traverseFiles()
-	end_time = datetime.datetime.now().time()
-	print("Start time: " + str(start_time))
-	print("End time: " + str(end_time))
-	print("Run duration: " + str(datetime.datetime.combine(datetime.date.min,end_time)-datetime.datetime.combine(datetime.date.min,start_time)))
-
+	traverseFiles(sys.argv[1])
+	
 main()
