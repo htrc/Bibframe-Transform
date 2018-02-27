@@ -1,0 +1,3 @@
+[submodule "marc2bibframe2"]
+	path = marc2bibframe2
+	url = https://github.com/dkudeki/marc2bibframe2
