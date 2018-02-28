@@ -53,7 +53,7 @@ def traverseFiles(rootdir):
 	try:
 		newest_bibf_file = max(glob.glob(bibf_results_folder_name + '*'), key=os.path.getctime)
 		print(newest_bibf_file)
-		restart_file = newest_bibf_file[newest_bibf_file.find('BIBF_')+5:-4]
+		restart_file = newest_bibf_file[newest_bibf_file.find('/BIBF_')+6:-4]
 	except:
 		pass
 

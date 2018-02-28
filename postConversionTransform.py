@@ -20,16 +20,36 @@ def normalizeVariant(variant):
     elif isinstance(variant,unicode):
         return variant.encode('utf-8').strip()
 
+def getRequest(url):
+    try:
+        result = requests.get(url)
+    except requests.exceptions.ConnectionError:
+        result = { 'status_code': '404' }
+
+    while result.status_code != 200:
+        print(result.status_code)
+        time.sleep(6)
+        try:
+            result = requests.get(url)
+        except requests.exceptions.ConnectionError:
+            result = { 'status_code': '404' }
+
+    return result
+
 #Sets @rdf:about for bf:Work and @rdf:resource for bf:Instance/bf:instanceOf to the instance's OCLC record's 'exampleOfWork' value
 def setWorkURLs(work,instance,placeholder_work_id,instance_url,last_loaded_worldcat_record):
     print(instance_url)
     if last_loaded_worldcat_record is None or last_loaded_worldcat_record['url'] != instance_url:
         if 'worldcat.org' in instance_url:
-            result = requests.get(instance_url + '.jsonld')
-            while result.status_code != 200:
-                print(result.status_code)
-                time.sleep(5)
-                result = requests.get(instance_url + '.jsonld')
+            result = getRequest(instance_url + '.jsonld')
+#            result = requests.get(instance_url + '.jsonld')
+#            while result.status_code != 200:
+#                print(result.status_code)
+#                time.sleep(6)
+#                try:
+#                    result = requests.get(instance_url + '.jsonld')
+#                except requests.exceptions.ConnectionError:
+#                    result = { 'status_code': '404' }
 
             result = result.json()
             print(result['@graph'])
@@ -61,6 +81,8 @@ def getAgentTypes(agent_types,target_domain):
         return ('ConferenceName' if target_domain == 'id.loc.gov' else 'corporate'), 'name11MatchKey', 'names'
     elif 'http://id.loc.gov/ontologies/bibframe/Jurisdiction' in agent_types:
         return ('CorporateName' if target_domain == 'id.loc.gov' else 'corporate'), 'name10MatchKey', 'names'
+    elif 'http://id.loc.gov/ontologies/bibframe/Family' in agent_types:
+        return ('FamilyName' if target_domain == 'id.loc.gov' else 'personal'), 'name00MatchKey', 'subjects'
     else:
         print("FOUND UNHANDLED SUBJECT TYPE:")
         print(agent_types)
@@ -93,7 +115,8 @@ def setSubjectAgent(agent,merged_subject_agents):
             print(match_key)
             query_url = BASE_LC_URL + urllib.quote_plus(match_key) + '+rdftype:' + agent_type + '&q=cs%3Ahttp%3A%2F%2Fid.loc.gov%2Fauthorities%2F' + search_type
             print(query_url)
-            results_tree = etree.HTML(requests.get(query_url).content)
+#            results_tree = etree.HTML(requests.get(query_url).content)
+            results_tree = etree.HTML(getRequest(query_url).content)
             result_table = results_tree.xpath("//table[@class='id-std']/tbody/tr")
             match_not_found = True
             i = 0
@@ -158,7 +181,8 @@ def setContributionAgent(agent,merged_contribution_agents):
             print(match_key)
             query_url = BASE_VIAF_URL + match_key.replace('"',"'")
             print(query_url)
-            results = requests.get(query_url).content
+#            results = requests.get(query_url).content
+            results = getRequest(query_url).content
 
             match_not_found = True
 
