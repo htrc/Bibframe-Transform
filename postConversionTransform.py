@@ -1,4 +1,5 @@
 import os, sys, requests, time, urllib, json
+import HTMLParser
 from lxml import etree
 from unicodedata import normalize
 
@@ -21,12 +22,22 @@ def normalizeVariant(variant):
         return variant.encode('utf-8').strip()
 
 def getRequest(url):
+    if 'viaf.org' in url:
+        try:
+            h = HTMLParser.HTMLParser()
+            splitpoint = url.find('?query=')+7
+            url = url[:splitpoint] + h.unescape(url[splitpoint:])
+            print(url)
+        except:
+            raise
+
     try:
-        result = requests.get(url)
-    except requests.exceptions.ConnectionError:
+        result = requests.get(url,timeout=60)
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
         result = { 'status_code': '404' }
 
-    while result.status_code != 200:
+    print(result)
+    while result.status_code != 200 and result.content[0] == '<':
         print(result.status_code)
         time.sleep(6)
         try:
@@ -34,6 +45,8 @@ def getRequest(url):
         except requests.exceptions.ConnectionError:
             result = { 'status_code': '404' }
 
+    print(result.content)
+    print(result.content[0])
     return result
 
 #Sets @rdf:about for bf:Work and @rdf:resource for bf:Instance/bf:instanceOf to the instance's OCLC record's 'exampleOfWork' value
@@ -51,6 +64,7 @@ def setWorkURLs(work,instance,placeholder_work_id,instance_url,last_loaded_world
 #                except requests.exceptions.ConnectionError:
 #                    result = { 'status_code': '404' }
 
+            print(result.content)
             result = result.json()
             print(result['@graph'])
             for r in result['@graph']:
