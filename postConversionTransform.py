@@ -33,7 +33,7 @@ def getRequest(url):
 
         error_case = '<'
     else:
-        error_case = '<title>Temporarily out of service</title>'
+        error_case = '<html><head><title>Temporarily out of service</title>'
 
     try:
         result = requests.get(url,timeout=60)
@@ -41,7 +41,7 @@ def getRequest(url):
         result = { 'status_code': '404' }
 
     print(result)
-    while result.status_code != 200 or error_case in result.content:
+    while result.status_code != 200 or result.content.find(error_case) == 0:
         print(result.status_code)
         time.sleep(6)
         try:
