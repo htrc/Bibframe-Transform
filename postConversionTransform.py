@@ -31,13 +31,17 @@ def getRequest(url):
         except:
             raise
 
+        error_case = '<'
+    else:
+        error_case = '<title>Temporarily out of service</title>'
+
     try:
         result = requests.get(url,timeout=60)
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
         result = { 'status_code': '404' }
 
     print(result)
-    while result.status_code != 200 or result.content[0] == '<':
+    while result.status_code != 200 or error_case in result.content:
         print(result.status_code)
         time.sleep(6)
         try:
@@ -46,7 +50,6 @@ def getRequest(url):
             result = { 'status_code': '404' }
 
     print(result.content)
-    print(result.content[0])
     return result
 
 #Sets @rdf:about for bf:Work and @rdf:resource for bf:Instance/bf:instanceOf to the instance's OCLC record's 'exampleOfWork' value
