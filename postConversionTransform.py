@@ -37,7 +37,7 @@ def getRequest(url):
         result = { 'status_code': '404' }
 
     print(result)
-    while result.status_code != 200 and result.content[0] == '<':
+    while result.status_code != 200 or result.content[0] == '<':
         print(result.status_code)
         time.sleep(6)
         try:
@@ -125,7 +125,7 @@ def setSubjectAgent(agent,merged_subject_agents):
         if match_key:
             match_key = sanitizeMatchString(match_key.encode('utf-8'))
 
-        if match_key not in merged_subject_agents:
+        if match_key and match_key not in merged_subject_agents:
             print(match_key)
             query_url = BASE_LC_URL + urllib.quote_plus(match_key) + '+rdftype:' + agent_type + '&q=cs%3Ahttp%3A%2F%2Fid.loc.gov%2Fauthorities%2F' + search_type
             print(query_url)
@@ -160,7 +160,7 @@ def setSubjectAgent(agent,merged_subject_agents):
                 merged_subject_agents[match_key] = None
                 createBlankNode(agent)
         else:
-            if merged_subject_agents[match_key] is not None:
+            if match_key and merged_subject_agents[match_key] is not None:
                 if merged_subject_agents[match_key]['agent_type'] == agent_type:
                     agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',merged_subject_agents[match_key]['uri'])
                 else:
