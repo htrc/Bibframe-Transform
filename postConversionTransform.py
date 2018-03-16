@@ -3,6 +3,9 @@ import HTMLParser
 from lxml import etree
 from unicodedata import normalize
 
+class BrokenResponse:
+    status_code = '404'
+
 def sanitizeMatchString(match_string):
     if match_string[-1:] != '.' and match_string[-1:] != '-':
         return match_string
@@ -28,17 +31,22 @@ def getRequest(url):
             splitpoint = url.find('?query=')+7
             url = url[:splitpoint] + h.unescape(url[splitpoint:])
             print(url)
+        except UnicodeDecodeError:
+            h = HTMLParser.HTMLParser()
+            splitpoint = url.find('?query=')+7
+            url = url[:splitpoint] + h.unescape(url[splitpoint:].decode('utf-8'))
+            print(url)         
         except:
             raise
 
         error_case = '<'
     else:
-        error_case = '<html><head><title>Temporarily out of service</title>'
+        error_case = '<html>\n<head><title>Temporarily out of service</title>'
 
     try:
         result = requests.get(url,timeout=60)
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-        result = { 'status_code': '404' }
+        result = BrokenResponse()
 
     print(result)
     while result.status_code != 200 or result.content.find(error_case) == 0:
@@ -47,7 +55,9 @@ def getRequest(url):
         try:
             result = requests.get(url)
         except requests.exceptions.ConnectionError:
-            result = { 'status_code': '404' }
+            result = BrokenResponse()
+
+        print(result)
 
     print(result.content)
     return result
@@ -111,7 +121,8 @@ def setSubjectAgent(agent,merged_subject_agents):
     BASE_LC_URL = 'https://id.loc.gov/search/?q='
     agent_types = agent.xpath("./rdf:type/@rdf:resource",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
     agent_type = None
-    agent_type, match_key_type, search_type = getAgentTypes(agent_types,'id.loc.gov')
+    if agent_types:
+        agent_type, match_key_type, search_type = getAgentTypes(agent_types,'id.loc.gov')
 
     print('```````````````````````````````````````````````````````````````````````')
     if agent_type:
@@ -177,7 +188,8 @@ def setContributionAgent(agent,merged_contribution_agents):
     BASE_VIAF_URL = 'http://www.viaf.org/viaf/AutoSuggest?query='
     agent_types = agent.xpath("./rdf:type/@rdf:resource",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
     agent_type = None
-    agent_type, match_key_type, search_type = getAgentTypes(agent_types,'viaf.org')
+    if agent_types:
+        agent_type, match_key_type, search_type = getAgentTypes(agent_types,'viaf.org')
 
     print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     if agent_type:

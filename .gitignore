@@ -1,4 +1,8 @@
 .DS_Store
 *.json
 *.pyc
+*.zip
 /segments_*
+/all_bibf*
+/meta_ic*
+/test_segment*
