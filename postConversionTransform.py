@@ -24,7 +24,7 @@ def normalizeVariant(variant):
     elif isinstance(variant,unicode):
         return variant.encode('utf-8').strip()
 
-def getRequest(url):
+def getRequest(url,expectJSON):
     if 'viaf.org' in url:
         try:
             h = HTMLParser.HTMLParser()
@@ -45,7 +45,9 @@ def getRequest(url):
 
     try:
         result = requests.get(url,timeout=60)
-    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+        if expectJSON:
+            check_json = result.json()
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, ValueError) as e:
         result = BrokenResponse()
 
     print(result)
@@ -53,8 +55,10 @@ def getRequest(url):
         print(result.status_code)
         time.sleep(6)
         try:
-            result = requests.get(url)
-        except requests.exceptions.ConnectionError:
+            result = requests.get(url,timeout=60)
+            if expectJSON:
+                check_json = result.json()
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, ValueError) as e:
             result = BrokenResponse()
 
         print(result)
@@ -67,7 +71,7 @@ def setWorkURLs(work,instance,placeholder_work_id,instance_url,last_loaded_world
     print(instance_url)
     if last_loaded_worldcat_record is None or last_loaded_worldcat_record['url'] != instance_url:
         if 'worldcat.org' in instance_url:
-            result = getRequest(instance_url + '.jsonld')
+            result = getRequest(instance_url + '.jsonld',True)
 #            result = requests.get(instance_url + '.jsonld')
 #            while result.status_code != 200:
 #                print(result.status_code)
@@ -144,7 +148,7 @@ def setSubjectAgent(agent,merged_subject_agents):
             query_url = BASE_LC_URL + urllib.quote_plus(match_key) + '+rdftype:' + agent_type + '&q=cs%3Ahttp%3A%2F%2Fid.loc.gov%2Fauthorities%2F' + search_type
             print(query_url)
 #            results_tree = etree.HTML(requests.get(query_url).content)
-            results_tree = etree.HTML(getRequest(query_url).content)
+            results_tree = etree.HTML(getRequest(query_url,False).content)
             result_table = results_tree.xpath("//table[@class='id-std']/tbody/tr")
             match_not_found = True
             i = 0
@@ -211,7 +215,7 @@ def setContributionAgent(agent,merged_contribution_agents):
             query_url = BASE_VIAF_URL + match_key.replace('"',"'")
             print(query_url)
 #            results = requests.get(query_url).content
-            results = getRequest(query_url).content
+            results = getRequest(query_url,True).content
 
             match_not_found = True
 
