@@ -373,11 +373,11 @@ def postConversionTransform(file_name):
 		instance_url = instances[0].xpath("@rdf:about", namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })[0]
 
 		print(instance_url + '.jsonld')
-#		last_loaded_worldcat_record = setWorkURLs(work,instances[0],placeholder_work_id,instance_url,last_loaded_worldcat_record)
+		last_loaded_worldcat_record = setWorkURLs(work,instances[0],placeholder_work_id,instance_url,last_loaded_worldcat_record)
 
-#		subject_agents = work.xpath("./bf:subject/bf:Agent",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
-#		for agent in subject_agents:
-#			setSubjectAgent(agent,merged_subject_agents)
+		subject_agents = work.xpath("./bf:subject/bf:Agent",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
+		for agent in subject_agents:
+			setSubjectAgent(agent,merged_subject_agents)
 
 		print("Starting Topics")
 		topic_agents = work.xpath("./bf:subject/bf:Topic",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
@@ -385,11 +385,11 @@ def postConversionTransform(file_name):
 		for t_agent in topic_agents:
 			setTopicAgent(t_agent,merged_topic_agents)
 
-#		print("Starting Contribution Agents")
-#		contribution_agents = work.xpath("./bf:contribution/bf:Contribution/bf:agent/bf:Agent",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
-#		print(contribution_agents)
-#		for c_agent in contribution_agents:
-#			setContributionAgent(c_agent,merged_contribution_agents)
+		print("Starting Contribution Agents")
+		contribution_agents = work.xpath("./bf:contribution/bf:Contribution/bf:agent/bf:Agent",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
+		print(contribution_agents)
+		for c_agent in contribution_agents:
+			setContributionAgent(c_agent,merged_contribution_agents)
 		print('######################################################################')
 
 	example_agents = root.xpath(".//*[contains(@*,'example.org')]")
