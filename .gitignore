@@ -2,6 +2,9 @@
 *.json
 *.pyc
 *.zip
+*.ttl
+*.nt
+*.rdf
 /segments_*
 /all_bibf*
 /meta_ic*
