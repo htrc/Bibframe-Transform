@@ -124,6 +124,12 @@ def getAgentTypes(agent_types,target_domain):
 		return ('FamilyName' if target_domain == 'id.loc.gov' else 'personal'), 'name00MatchKey', 'subjects'
 	elif 'http://www.loc.gov/mads/rdf/v1#Topic' in agent_types:
 		return 'Topic', 'authoritativeLabel', 'subjects'
+	elif 'http://www.loc.gov/mads/rdf/v1#Geographic' in agent_types:
+		return 'Geographic', 'authoritativeLabel', 'subjects'
+	elif 'http://www.loc.gov/mads/rdf/v1#Title' in agent_types:
+		return 'Title', 'authoritativeLabel', 'names'
+	elif 'http://www.loc.gov/mads/rdf/v1#NameTitle' in agent_types:
+		return 'NameTitle', 'authoritativeLabel', 'names'
 	elif agent_types[0] == 'http://www.loc.gov/mads/rdf/v1#ComplexSubject':
 		return 'ComplexSubject', 'authoritativeLabel', 'subjects'
 	else:
@@ -409,7 +415,7 @@ def postConversionTransform(file_name):
 			setSubjectAgent(agent,merged_subject_agents)
 
 		print("Starting Topics")
-		topic_agents = work.xpath("./bf:subject/bf:Topic",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
+		topic_agents = work.xpath("./bf:subject/*[not(bf:Agent)]",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
 		print(topic_agents)
 		for t_agent in topic_agents:
 			setTopicAgent(t_agent,merged_topic_agents,cursor)
