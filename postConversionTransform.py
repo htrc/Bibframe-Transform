@@ -1,4 +1,4 @@
-import os, sys, requests, time, urllib, json
+import os, sys, requests, time, urllib, json, uuid, re
 import HTMLParser
 from lxml import etree
 from unicodedata import normalize
@@ -14,10 +14,33 @@ def sanitizeMatchString(match_string):
 		return sanitizeMatchString(match_string[:-1])
 
 def convertFillerURI(filler_uri):
-	return '_:b' + filler_uri[filler_uri.rfind('-')+1:]
+	base = filler_uri[filler_uri.rfind('/')+1:filler_uri.rfind('#')]
+	end_string = filler_uri[filler_uri.rfind('#')+1:]
+	if '-' in end_string:
+		dash_index = end_string.rfind('-')
+		end_string = end_string[:dash_index] + end_string[dash_index+1:]
+
+	match = re.match(r"([a-zA-Z]+)([0-9]*)",end_string)
+	if match:
+		items = match.groups()
+		if items[0] == 'Work':
+			text_conversion = '0'
+		elif items[0] == 'Instance':
+			text_conversion = '1'
+		elif items[0] == 'Agent':
+			text_conversion = '2'
+		elif items[0] == 'GenreForm':
+			text_conversion = '3'
+		else:
+			text_conversion = '4'
+
+		return '_:b' + base + text_conversion + items[1]
+	else:
+		return '_:b' + base
 
 def createBlankNode(agent):
 	return agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',convertFillerURI(agent.xpath('./@rdf:about',namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })[0]))
+#	return agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about','_:b' + str(uuid.uuid1().int))
 
 def normalizeVariant(variant):
 	if isinstance(variant,str):
@@ -415,7 +438,7 @@ def postConversionTransform(file_name):
 			setSubjectAgent(agent,merged_subject_agents)
 
 		print("Starting Topics")
-		topic_agents = work.xpath("./bf:subject/*[not(bf:Agent)]",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
+		topic_agents = work.xpath("./bf:subject/*[not(self::bf:Agent or self::bf:Temporal)]",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
 		print(topic_agents)
 		for t_agent in topic_agents:
 			setTopicAgent(t_agent,merged_topic_agents,cursor)
@@ -438,12 +461,13 @@ def postConversionTransform(file_name):
 		print(e_a.xpath('@*')[0])
 		print(e_a.xpath('name(@*[1])'))
 		print(convertFillerURI(e_a.xpath('@*')[0]))
-		placeholder_value = e_a.xpath('@*')[0]
-		if '-' in placeholder_value:
-			blank_node = convertFillerURI(e_a.xpath('@*')[0])
-		else:
-			blank_node = '_:b' + placeholder_value[placeholder_value.rfind('/')+1:placeholder_value.rfind('#')]
-			print(blank_node)
+		blank_node = convertFillerURI(e_a.xpath('@*')[0])
+#		placeholder_value = e_a.xpath('@*')[0]
+#		if '-' in placeholder_value:
+#			blank_node = convertFillerURI(e_a.xpath('@*')[0])
+#		else:
+#			blank_node = '_:b' + placeholder_value[placeholder_value.rfind('/')+1:placeholder_value.rfind('#')]
+#			print(blank_node)
 		full_attribute_name = e_a.xpath('name(@*[1])')
 		print('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}' + full_attribute_name[full_attribute_name.rfind(':')+1:])
 		e_a.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}' + full_attribute_name[full_attribute_name.rfind(':')+1:],blank_node)
