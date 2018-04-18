@@ -46,7 +46,14 @@ def makeOutputFolder(folder_name,counter):
 def traverseFiles(rootdir):
 	print(rootdir)
 #	rootdir = 'sample_starting_records'
-	results_folder_name = getFolder(rootdir + '_XML_records/')
+
+	read_format = 'json'
+	if len(sys.argv) > 2 and sys.argv[2] == '-xml':
+		results_folder_name = rootdir
+		read_format = 'xml'
+	else:
+		results_folder_name = getFolder(rootdir + '_XML_records/')
+
 	bibf_results_folder_name = getFolder(rootdir + '_BIBF_records/')
 
 	newest_bibf_file = ''
@@ -73,22 +80,32 @@ def traverseFiles(rootdir):
 				if name[0] != '.':
 					start_time = datetime.datetime.now().time()
 
-					print("Starting output writer")
-					output_writer = pymarc.XMLWriter(open(results_folder_name + SLASH + name + '.xml','wb'))
-					print("Opening file")
-					readFile(rootdir + SLASH + name,output_writer)
-					output_writer.close()
+					print(read_format)
+					if read_format == 'json':
+						print("Starting output writer")
+						output_writer = pymarc.XMLWriter(open(results_folder_name + SLASH + name + '.xml','wb'))
+						print("Opening file")
+						readFile(rootdir + SLASH + name,output_writer)
+						output_writer.close()
 
 					print("Opening output file")
-					bibf_output = open(bibf_results_folder_name + SLASH + 'BIBF_' + name + '.xml','w')
+					if read_format == 'json':
+						bibf_output_file = bibf_results_folder_name + SLASH + 'BIBF_' + name + '.xml'
+						xml_input_file = results_folder_name + SLASH + name + '.xml'
+					else:
+						bibf_output_file = bibf_results_folder_name + SLASH + 'BIBF_' + name
+						xml_input_file = root + SLASH + name
+						print(xml_input_file)
+
+					bibf_output = open(bibf_output_file,'w')
 					print("Running bash script")
-					bashCommand = 'xsltproc marc2bibframe2/xsl/marc2bibframe2.xsl ' + results_folder_name + SLASH + name + '.xml'
+					bashCommand = 'xsltproc marc2bibframe2/xsl/marc2bibframe2.xsl ' + xml_input_file
 					process = subprocess.call(bashCommand.split(), stdout=bibf_output)
 	#				ps = subprocess.Popen(['xsltproc', 'marc2bibframe2/xsl/marc2bibframe2.xsl'], stdout=subprocess.PIPE)
 	#				print("Ran first half")
 	#				output = subprocess.call(['python', 'postConversionTransform.py', results_folder_name + SLASH + name + '.xml'], stdin=ps.stdout)#, stdout=bibf_output)
 					print("Converted " + name)
-					postConversionTransform.postConversionTransform(bibf_results_folder_name + SLASH + 'BIBF_' + name + '.xml')
+					postConversionTransform.postConversionTransform(bibf_output_file)
 
 					end_time = datetime.datetime.now().time()
 					print("Start time: " + str(start_time))
