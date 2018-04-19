@@ -39,8 +39,10 @@ def convertFillerURI(filler_uri):
 		return '_:b' + base
 
 def createBlankNode(agent):
-	return agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',convertFillerURI(agent.xpath('./@rdf:about',namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })[0]))
-#	return agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about','_:b' + str(uuid.uuid1().int))
+	try:
+		return agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',convertFillerURI(agent.xpath('./@rdf:about',namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })[0]))
+	except IndexError:
+		return agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about','_:b' + str(uuid.uuid1().int))
 
 def normalizeVariant(variant):
 	if isinstance(variant,str):
@@ -153,6 +155,8 @@ def getAgentTypes(agent_types,target_domain):
 		return 'Title', 'authoritativeLabel', 'names'
 	elif 'http://www.loc.gov/mads/rdf/v1#NameTitle' in agent_types:
 		return 'NameTitle', 'authoritativeLabel', 'names'
+	elif 'http://www.loc.gov/mads/rdf/v1#HierarchicalGeographic' in agent_types:
+		return 'ComplexSubject', 'label', 'subjects'
 	elif agent_types[0] == 'http://www.loc.gov/mads/rdf/v1#ComplexSubject':
 		return 'ComplexSubject', 'authoritativeLabel', 'subjects'
 	else:
