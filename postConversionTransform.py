@@ -278,9 +278,10 @@ def setTopicAgent(agent,merged_topic_agents,cursor):
 					print("Output Component List:")
 					print(output_component_list)
 
-					cursor.execute('SELECT * FROM Component WHERE source_url = "' + topic_url + '"')
-					for table in cursor:
-						output_component_list[table[1]].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',table[2])
+					if output_component_list:
+						cursor.execute('SELECT * FROM Component WHERE source_url = "' + topic_url + '"')
+						for table in cursor:
+							output_component_list[table[1]].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',table[2])
 			else:
 				if match_key in merged_topic_agents:
 					if merged_topic_agents[match_key] is not None:

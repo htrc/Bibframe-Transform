@@ -60,7 +60,10 @@ def traverseFiles(rootdir):
 	try:
 		newest_bibf_file = max(glob.glob(bibf_results_folder_name + '*'), key=os.path.getmtime)
 		print(newest_bibf_file)
-		restart_file = newest_bibf_file[newest_bibf_file.find('/BIBF_')+6:-4]
+		if read_format == 'json':
+			restart_file = newest_bibf_file[newest_bibf_file.find('/BIBF_')+6:-4]
+		else:
+			restart_file = newest_bibf_file[newest_bibf_file.find('/BIBF_')+6:]
 	except:
 		pass
 
