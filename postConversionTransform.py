@@ -40,9 +40,13 @@ def convertFillerURI(filler_uri):
 
 def createBlankNode(agent):
 	try:
-		return agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',convertFillerURI(agent.xpath('./@rdf:about',namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })[0]))
+		generated_blank_node = convertFillerURI(agent.xpath('./@rdf:about',namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })[0])
+		agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',generated_blank_node)
+		return generated_blank_node
 	except IndexError:
-		return agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about','_:b' + str(uuid.uuid1().int))
+		random_blank_node = '_:b' + str(uuid.uuid1().int)
+		agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',random_blank_node)
+		return random_blank_node
 
 def normalizeVariant(variant):
 	if isinstance(variant,str):
@@ -79,7 +83,6 @@ def getRequest(url,expectJSON):
 	if result.status_code == 403:
 		return None
 
-	print(result)
 	while result.status_code != 200 or result.content.find(error_case) == 0:
 		print(result.status_code)
 		time.sleep(6)
@@ -90,15 +93,10 @@ def getRequest(url,expectJSON):
 		except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, ValueError) as e:
 			result = BrokenResponse()
 
-		print(result)
-
-	print(result.content)
-	print(type(result.content))
 	return result
 
 #Sets @rdf:about for bf:Work and @rdf:resource for bf:Instance/bf:instanceOf to the instance's OCLC record's 'exampleOfWork' value
 def setWorkURLs(work,instance,placeholder_work_id,instance_url,last_loaded_worldcat_record):
-	print(instance_url)
 	if last_loaded_worldcat_record is None or last_loaded_worldcat_record['url'] != instance_url:
 		if 'worldcat.org' in instance_url:
 			result = getRequest(instance_url + '.jsonld',True)
@@ -112,9 +110,11 @@ def setWorkURLs(work,instance,placeholder_work_id,instance_url,last_loaded_world
 #                    result = { 'status_code': '404' }
 
 			if result:
-				print(result.content)
+#				print(result.content)
+				print(len(result.content))
 				result = result.json()
-				print(result['@graph'])
+#				print(result['@graph'])
+				print(len(result['@graph']))
 				for r in result['@graph']:
 					if 'exampleOfWork' in r:
 						work.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',r['exampleOfWork'])
@@ -233,7 +233,7 @@ def setSubjectAgent(agent,merged_subject_agents):
 
 	print('^---SUBJECT AGENT--SUBJECT AGENT--SUBJECT AGENT--SUBJECT AGENT--SUBJECT AGENT----^')
 
-def setTopicAgent(agent,merged_topic_agents,cursor):
+def setTopicAgent(agent,cursor,connection):
 	BASE_LC_URL = 'https://id.loc.gov/search/?q='
 	agent_types = agent.xpath("./rdf:type/@rdf:resource",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
 	agent_type = None
@@ -253,20 +253,21 @@ def setTopicAgent(agent,merged_topic_agents,cursor):
 				match_key = None
 
 		if match_key:
-			match_key = sanitizeMatchString(match_key.replace('"','\\"').encode('utf-8'))
+			match_key = sanitizeMatchString(match_key.replace('"','\\\"').encode('utf-8'))
 			print(match_key)
 
 			found_topic_url = False
 			topic_url = None
 
-			cursor.execute('SELECT * FROM Subject WHERE label = "' + match_key + '" AND concept_type = "http://www.loc.gov/mads/rdf/v1#' + agent_type + '"')
+			cursor.execute('SELECT * FROM Subject WHERE label = %s AND concept_type = %s',(match_key, 'http://www.loc.gov/mads/rdf/v1#' + agent_type))
 			for table in cursor:
+				print(table[0])
 				agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',table[0])
 				found_topic_url = True
 				topic_url = table[0]
 
 			if not found_topic_url:
-				cursor.execute('SELECT * FROM Variant_Name WHERE variant_name = "' + match_key + '"')
+				cursor.execute('SELECT * FROM Variant_Name WHERE variant_name = %s',(match_key,))
 				for table in cursor:
 					agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',table[0])
 					found_topic_url = True
@@ -279,77 +280,103 @@ def setTopicAgent(agent,merged_topic_agents,cursor):
 					print(output_component_list)
 
 					if output_component_list:
-						cursor.execute('SELECT * FROM Component WHERE source_url = "' + topic_url + '"')
+						cursor.execute('SELECT * FROM Component INNER JOIN Subject ON Component.component_url = Subject.url WHERE source_url = %s',(topic_url,))
 						for table in cursor:
-							output_component_list[table[1]].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',table[2])
+							print(table)
+#							print(type(str(output_component_list[table[1]].xpath('./*/text()')[0])))
+							if table[1] < len(output_component_list) and table[4] == output_component_list[table[1]].xpath('./*/text()')[0].encode('utf-8'):
+								output_component_list[table[1]].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',table[2])
 			else:
-				if match_key in merged_topic_agents:
-					if merged_topic_agents[match_key] is not None:
-						if merged_topic_agents[match_key]['agent_type'] == agent_type:
-							agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',merged_topic_agents[match_key]['uri'])
+				query_url = BASE_LC_URL + urllib.quote_plus(match_key) + '+rdftype:' + agent_type + '&q=cs%3Ahttp%3A%2F%2Fid.loc.gov%2Fauthorities%2F' + search_type
+				print(query_url)
+
+				results_tree = etree.HTML(getRequest(query_url,False).content)
+				result_table = results_tree.xpath("//table[@class='id-std']/tbody/tr")
+				match_not_found = True
+				i = 0
+				while i < len(result_table) and match_not_found:
+					authorized_heading = result_table[i].xpath("./td/a/text()")
+					print(authorized_heading)
+					variant_headings = result_table[i+1].xpath("./td[@colspan='4']/text()")
+					print(variant_headings)
+					if len(variant_headings) > 0:
+						variant_headings = map(normalizeVariant,variant_headings[0].split(';'))
+					print(variant_headings)
+					print(match_key, authorized_heading[0])
+					print(match_key == authorized_heading[0])
+
+					if match_key in authorized_heading or match_key in variant_headings:
+						print("Found " + match_key)
+						subject_uri = 'http://id.loc.gov' + result_table[i].xpath("./td/a/@href")[0]
+						print(subject_uri)
+						agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',subject_uri)
+						match_not_found = False
+
+						cursor.execute(u'SELECT * FROM Subject WHERE url = %s',(subject_uri,))
+						if not cursor.rowcount:
+							add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
+							subject_data = (subject_uri,authorized_heading[0].encode('utf-8'),agent_types[0].encode('utf-8'))
+							print(subject_data)
+							print(type(subject_uri))
+							print(type(authorized_heading[0].encode('utf-8')))
+							print(type(agent_types[0].encode('utf-8')))
+							cursor.execute(add_subject,subject_data)
+							connection.commit()
 						else:
-							createBlankNode(agent)
-					else:
-						createBlankNode(agent)
-				else:
-					query_url = BASE_LC_URL + urllib.quote_plus(match_key) + '+rdftype:' + agent_type + '&q=cs%3Ahttp%3A%2F%2Fid.loc.gov%2Fauthorities%2F' + search_type
-					print(query_url)
+							cursor.execute(u'INSERT INTO Variant_Name (url, variant_name) VALUES (%s, %s)',(subject_uri,authorized_heading[0].encode('utf-8')))
+							connection.commit()
 
-					results_tree = etree.HTML(getRequest(query_url,False).content)
-					result_table = results_tree.xpath("//table[@class='id-std']/tbody/tr")
-					match_not_found = True
-					i = 0
-					while i < len(result_table) and match_not_found:
-						authorized_heading = result_table[i].xpath("./td/a/text()")
-						print(authorized_heading)
-						variant_headings = result_table[i+1].xpath("./td[@colspan='4']/text()")
-						print(variant_headings)
-						if len(variant_headings) > 0:
-							variant_headings = map(normalizeVariant,variant_headings[0].split(';'))
-						print(variant_headings)
-						print(match_key, authorized_heading[0])
-						print(match_key == authorized_heading[0])
+						add_variant_name = u'INSERT INTO Variant_Name (url, variant_name) VALUES (%s, %s)'
+						for variant in variant_headings:
+							variant_data = (subject_uri,variant)
+							print(variant_data)
+							cursor.execute(add_variant_name,variant_data)
+							connection.commit()
 
-						if match_key in authorized_heading or match_key in variant_headings:
-							print("Found " + match_key)
-							subject_uri = 'http://id.loc.gov' + result_table[i].xpath("./td/a/@href")[0]
-							print(subject_uri)
-							agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',subject_uri)
-							match_not_found = False
-							merged_topic_agents[authorized_heading[0]] = { 'agent_type': agent_type, 'uri': subject_uri }
-							for variant in variant_headings:
-								merged_topic_agents[variant] = merged_topic_agents[authorized_heading[0]]
+						if agent_type == 'ComplexSubject' and match_key in authorized_heading:
+							components_uri = subject_uri + '.madsrdf.rdf'
+							print(components_uri)
 
-							if agent_type == 'ComplexSubject':
-								components_uri = subject_uri + '.madsrdf.rdf'
-								print(components_uri)
+							component_tree = etree.fromstring(getRequest(components_uri,False).content)
+							component_list = component_tree.xpath("/rdf:RDF/madsrdf:ComplexSubject/madsrdf:componentList/*",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
+							print("Component List:")
+							print(component_list)
 
-								component_tree = etree.fromstring(getRequest(components_uri,False).content)
-								component_list = component_tree.xpath("/rdf:RDF/madsrdf:ComplexSubject/madsrdf:componentList/*",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
-								print("Component List:")
-								print(component_list)
+							output_component_list = agent.xpath("./madsrdf:componentList/*",namespaces={ "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
+							print("Output Component List:")
+							print(output_component_list)
 
-								output_component_list = agent.xpath("./madsrdf:componentList/*",namespaces={ "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
-								print("Output Component List:")
-								print(output_component_list)
+							add_component = u'INSERT INTO Component (source_url, sequence_value, component_url) VALUES (%s, %s, %s)'
 
-								j = 0
-								while j < len(component_list):
-									component_url = component_list[j].xpath("./@rdf:about",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
-									if component_url:
-										output_component_list[j].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',component_url[0])
-									j = j + 1
-							#http://id.loc.gov/authorities/subjects/sh2002011373.madsrdf.rdf
-						i = i + 2
+							j = 0
+							while j < len(component_list):
+								component_url = component_list[j].xpath("./@rdf:about",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
+								if component_url:
+									cursor.execute('SELECT * FROM Component WHERE source_url = %s',(subject_uri,))
+									if not cursor.rowcount:
+										component_data = (subject_uri,j,component_url[0].encode('utf-8'))
+										print(component_data)
+										print(type(subject_uri))
+										print(type(j))
+										print(type(component_url[0].encode('utf-8')))
+										cursor.execute(add_component,component_data)
+										connection.commit()
+									output_component_list[j].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',component_url[0])
+								j = j + 1
+						#http://id.loc.gov/authorities/subjects/sh2002011373.madsrdf.rdf
+					i = i + 2
 
-					if match_not_found:
-						merged_topic_agents[match_key] = None
-						createBlankNode(agent)
+				if match_not_found:
+					new_blank_node = createBlankNode(agent)
+					add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
+					subject_data = (new_blank_node,match_key,agent_types[0].encode('utf-8'))
+					print(subject_data)
+					cursor.execute(add_subject,subject_data)
+					connection.commit()
 
 	print('^--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC---^')
 
-def setContributionAgent(agent,merged_contribution_agents):
-	BASE_VIAF_URL = 'http://www.viaf.org/viaf/AutoSuggest?query='
+def setContributionAgent(agent,merged_contribution_agents,cursor,connection):
 	agent_types = agent.xpath("./rdf:type/@rdf:resource",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
 	agent_type = None
 	if agent_types:
@@ -369,46 +396,70 @@ def setContributionAgent(agent,merged_contribution_agents):
 
 		if match_key:
 			match_key = sanitizeMatchString(match_key.encode('utf-8'))
-
-		if match_key not in merged_contribution_agents:
 			print(match_key)
-			query_url = BASE_VIAF_URL + match_key.replace('"',"'")
-			print(query_url)
-#            results = requests.get(query_url).content
-			results = getRequest(query_url,True).content
 
-			match_not_found = True
+			found_agent_url = False
+			found_agent_authorized = False
+			agent_url = None
 
-			results_dict = json.loads(results)
-			print(results_dict)
-			if results_dict['result']:
-				i = 0
-				while i < len(results_dict['result']) and match_not_found:
-					print(results_dict['result'][i]['term'] == match_key.decode('utf-8'))
-					print(results_dict['result'][i]['term'])
-					print(match_key.decode('utf-8'))
-					print(sanitizeMatchString(normalize('NFC',results_dict['result'][i]['term'])) == normalize('NFC',match_key.decode('utf-8')))
-					if results_dict['result'][i]['nametype'] == agent_type and sanitizeMatchString(normalize('NFC',results_dict['result'][i]['term'])) == normalize('NFC',match_key.decode('utf-8')) and 'viafid' in results_dict['result'][i]:
-						print("Found " + match_key)
-						agent_uri = "http://www.viaf.org/viaf/" + results_dict['result'][i]['viafid']
-						print(agent_uri)
-						agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',agent_uri)
-						match_not_found = False
-						merged_contribution_agents[match_key] = { 'agent_type': agent_type, 'uri': agent_uri }
+			cursor.execute('SELECT * FROM names WHERE label = %s',(match_key,))
+			for table in cursor:
+				print(table)
+#				sys.exit()
+				if not found_agent_url:
+					found_agent_url = True
+					agent_url = table[0]
+					if table[2] == 1:
+						found_agent_authorized = True
+				elif not found_agent_authorized and table[2] == 1:
+					agent_url = table[0]
+					found_agent_authorized = True
 
-					i = i + 1
+			if found_agent_url:
+				agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',agent_url)
+			else:
+				BASE_VIAF_URL = 'http://www.viaf.org/viaf/AutoSuggest?query='
+				print(match_key)
+				query_url = BASE_VIAF_URL + match_key.replace('"',"'")
+				print(query_url)
+	#            results = requests.get(query_url).content
+				results = getRequest(query_url,True).content
 
-			if match_not_found:
-				merged_contribution_agents[match_key] = None
-				createBlankNode(agent)
-		else:
-			if merged_contribution_agents[match_key] is not None:
-				if merged_contribution_agents[match_key]['agent_type'] == agent_type:
-					agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',merged_contribution_agents[match_key]['uri'])
-				else:
+				match_not_found = True
+
+				results_dict = json.loads(results)
+				print(results_dict)
+				if results_dict['result']:
+					i = 0
+					while i < len(results_dict['result']) and match_not_found:
+						print(results_dict['result'][i]['term'] == match_key.decode('utf-8'))
+						print(results_dict['result'][i]['term'])
+						print(match_key.decode('utf-8'))
+						print(sanitizeMatchString(normalize('NFC',results_dict['result'][i]['term'])) == normalize('NFC',match_key.decode('utf-8')))
+						if results_dict['result'][i]['nametype'] == agent_type and sanitizeMatchString(normalize('NFC',results_dict['result'][i]['term'])) == normalize('NFC',match_key.decode('utf-8')) and 'viafid' in results_dict['result'][i]:
+							print("Found " + match_key)
+							agent_uri = "http://www.viaf.org/viaf/" + results_dict['result'][i]['viafid']
+							print(agent_uri)
+							agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',agent_uri)
+							match_not_found = False
+							sys.exit()
+							merged_contribution_agents[match_key] = { 'agent_type': agent_type, 'uri': agent_uri }
+
+						i = i + 1
+
+				if match_not_found:
+					merged_contribution_agents[match_key] = None
 					createBlankNode(agent)
 			else:
-				createBlankNode(agent)
+				if merged_contribution_agents[match_key] is not None:
+					if merged_contribution_agents[match_key]['agent_type'] == agent_type:
+						agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',merged_contribution_agents[match_key]['uri'])
+					else:
+						createBlankNode(agent)
+				else:
+					createBlankNode(agent)
+		else:
+			createBlankNode(agent)
 
 	print('^-CONTRIBUTION AGENT--CONTRIBUTION AGENT--CONTRIBUTION AGENT--CONTRIBUTION AGENT-^')
 
@@ -416,6 +467,9 @@ def setContributionAgent(agent,merged_contribution_agents):
 def postConversionTransform(file_name):
 	connection = MySQLConnection(user='root',password='',database='subjects')
 	cursor = connection.cursor(buffered=True)
+
+	names_connection = MySQLConnection(user='root',password='',database='names')
+	names_cursor = names_connection.cursor(buffered=True)
 	print(file_name)
 	tree = etree.parse(file_name)
 	root = tree.getroot()
@@ -426,7 +480,6 @@ def postConversionTransform(file_name):
 
 	merged_subject_agents = {}
 	merged_contribution_agents = {}
-	merged_topic_agents = {}
 	last_loaded_worldcat_record = None
 
 	for work in works:
@@ -446,13 +499,13 @@ def postConversionTransform(file_name):
 		topic_agents = work.xpath("./bf:subject/*[not(self::bf:Agent or self::bf:Temporal)]",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
 		print(topic_agents)
 		for t_agent in topic_agents:
-			setTopicAgent(t_agent,merged_topic_agents,cursor)
+			setTopicAgent(t_agent,cursor,connection)
 
 		print("Starting Contribution Agents")
 		contribution_agents = work.xpath("./bf:contribution/bf:Contribution/bf:agent/bf:Agent",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
 		print(contribution_agents)
 		for c_agent in contribution_agents:
-			setContributionAgent(c_agent,merged_contribution_agents)
+			setContributionAgent(c_agent,merged_contribution_agents,names_cursor,names_connection)
 		print('^-WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK-^')
 
 	cursor.close()
@@ -482,7 +535,7 @@ def postConversionTransform(file_name):
 #	print(merged_contribution_agents)
 	print("Number of unique subject agents: " + str(len(merged_subject_agents)))
 	print("Number of unique contribution agents: " + str(len(merged_contribution_agents)))
-	print("Number of unique topics: " + str(len(merged_topic_agents)))
+#	print("Number of unique topics: " + str(len(merged_topic_agents)))
 
 	with open(file_name,'w') as outfile:
 		outfile.write(etree.tostring(tree))

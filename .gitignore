@@ -1,4 +1,6 @@
 .DS_Store
+test_input.txt
+viaf_index*
 *.json
 *.pyc
 *.zip
@@ -15,3 +17,5 @@
 /new_test_segment*
 /marcXml*
 /test_xml*
+/notEmblematicaOnline*
+/workset_volumes*
