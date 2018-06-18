@@ -7,6 +7,8 @@ viaf_index*
 *.ttl
 *.nt
 *.rdf
+*.csv
+/Database Setup/*.xml
 /segments_*
 /all_bibf*
 /meta_ic*

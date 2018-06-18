@@ -48,9 +48,9 @@ def main():
 							if third_component in object_types:
 								object_type = None
 								if third_component == object_types[0]:
-									object_type = 'personal'
+									object_type = "personal"
 								else:
-									object_type = 'corporate'
+									object_type = "corporate"
 
 								first_component = first_component[1:-1]
 
@@ -59,8 +59,10 @@ def main():
 
 								try:
 									cursor.execute(update_type,(object_type,first_component))
+									connection.commit()
 								except errors.DatabaseError:
-									pass
+									print("DATABASE ERROR")
+									print(first_component,second_component,third_component,object_type)
 
 
 				line_counter = line_counter + 1
@@ -68,7 +70,8 @@ def main():
 					print(line_counter)
 					end_time = datetime.datetime.now().time()
 					duration = datetime.datetime.combine(datetime.date.min,end_time)-datetime.datetime.combine(datetime.date.min,start_time)
-					durations.append(duration)
+					if duration >= timedelta(0):
+						durations.append(duration)
 					print("Run duration: " + str(duration))
 					average = reduce(lambda x, y: x + y, durations) / len(durations)
 					print("Estimated average: " + str(average))
