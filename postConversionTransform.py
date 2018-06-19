@@ -1,4 +1,4 @@
-import os, sys, requests, time, urllib, json, uuid, re, datetime, csv
+import os, sys, requests, time, urllib, json, uuid, re, datetime, csv, threading
 import HTMLParser
 from lxml import etree
 from unicodedata import normalize
@@ -62,6 +62,12 @@ def normalizeVariant(variant):
 	elif isinstance(variant,unicode):
 		return variant.encode('utf-8').strip()
 
+def checkForError(error_case,result,url):
+	if 'viaf.org' in url:
+		return result.content.find(error_case) != 0
+	else:
+		return result.content.find(error_case) == -1
+
 def getRequest(url,expectJSON,timesheet):
 	local_start_time = datetime.datetime.now().time()
 
@@ -111,7 +117,15 @@ def getRequest(url,expectJSON,timesheet):
 		return None
 
 	print(url)
-	while result.status_code != 200 or ('content' in result and result.content.find(error_case) > -1):
+	try:
+		if result.status_code == 200 and checkForError(error_case,result,url):
+			retry = False
+		else:
+			retry = True
+	except:
+		retry = True
+
+	while retry:
 		print(result.status_code)
 		time.sleep(6)
 		try:
@@ -124,6 +138,12 @@ def getRequest(url,expectJSON,timesheet):
 					print(result.status_code)
 			except:
 				result = BrokenResponse()
+
+		try:
+			if result.status_code == 200 and checkForError(error_case,result,url):
+				retry = False
+		except:
+			pass
 
 	print(result.content)
 	print(result.content.find(error_case))
@@ -362,124 +382,6 @@ def setSubjectAgent(agent,cursor,connection,timesheet):
 				match_key = shortenMatchKey(agent,match_key,match_key_type,'bflc','http://id.loc.gov/ontologies/bflc/')
 
 			getLOCID(agent,cursor,connection,match_key,agent_type,search_type,timesheet)
-
-#			found_subject_url = False
-#			subject_url = None
-#
-#			cursor.execute('SELECT * FROM Subject WHERE label = %s AND concept_type = %s',(match_key, 'http://www.loc.gov/mads/rdf/v1#' + agent_type))
-#			for table in cursor:
-#				print(table[0])
-#				subject_url = table[0]
-#				agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',subject_url)
-#				found_subject_url = True
-#
-#			if not found_subject_url:
-#				cursor.execute('SELECT * FROM Variant_Name WHERE variant_name = %s',(match_key,))
-#				for table in cursor:
-#					subject_url = table[0]
-#					agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',subject_url)
-#					found_subject_url = True
-#
-#			if found_subject_url:
-#				if agent_type == 'ComplexSubject':
-#					output_component_list = agent.xpath("./madsrdf:componentList/*",namespaces={ "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
-#					print("Output Component List:")
-#					print(output_component_list)
-#
-#					if output_component_list:
-#						cursor.execute('SELECT * FROM Component INNER JOIN Subject ON Component.component_url = Subject.url WHERE source_url = %s',(subject_url,))
-#						for table in cursor:
-#							print(table)
-#							print(type(str(output_component_list[table[1]].xpath('./*/text()')[0])))
-#							if table[1] < len(output_component_list) and table[4] == output_component_list[table[1]].xpath('./*/text()')[0].encode('utf-8'):
-#								output_component_list[table[1]].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',table[2])
-#			else:
-#				searchLOC(agent,cursor,connection,match_key,agent_type,search_type,timesheet)
-#				query_url = BASE_LC_URL + urllib.quote_plus(match_key) + '+rdftype:' + agent_type + '&q=cs%3Ahttp%3A%2F%2Fid.loc.gov%2Fauthorities%2F' + search_type
-#				print(query_url)
-#
-#				results_tree = etree.HTML(getRequest(query_url,False,timesheet).content)
-#				result_table = results_tree.xpath("//table[@class='id-std']/tbody/tr")
-#				match_not_found = True
-#				i = 0
-#				while i < len(result_table) and match_not_found:
-#					authorized_heading = result_table[i].xpath("./td/a/text()")
-#					print(authorized_heading)
-#					variant_headings = result_table[i+1].xpath("./td[@colspan='4']/text()")
-#					print(variant_headings)
-#					if len(variant_headings) > 0:
-#						variant_headings = map(normalizeVariant,variant_headings[0].split(';'))
-#					print(variant_headings)
-#					print(match_key, authorized_heading[0])
-#					print(match_key == authorized_heading[0])
-#
-#					if match_key in authorized_heading or match_key in variant_headings:
-#						print("Found " + match_key)
-#						subject_uri = 'http://id.loc.gov' + result_table[i].xpath("./td/a/@href")[0]
-#						print(subject_uri)
-#						agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',subject_uri)
-#						match_not_found = False
-#
-#						cursor.execute(u'SELECT * FROM Subject WHERE url = %s',(subject_uri,))
-#						if not cursor.rowcount:
-#							add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
-#							subject_data = (subject_uri,authorized_heading[0].encode('utf-8'),agent_types[0].encode('utf-8'))
-#							print(subject_data)
-#							print(type(subject_uri))
-#							print(type(authorized_heading[0].encode('utf-8')))
-#							print(type(agent_types[0].encode('utf-8')))
-#							cursor.execute(add_subject,subject_data)
-#							connection.commit()
-#						else:
-#							cursor.execute(u'INSERT INTO Variant_Name (url, variant_name) VALUES (%s, %s)',(subject_uri,authorized_heading[0].encode('utf-8')))
-#							connection.commit()
-#
-#						add_variant_name = u'INSERT INTO Variant_Name (url, variant_name) VALUES (%s, %s)'
-#						for variant in variant_headings:
-#							variant_data = (subject_uri,variant)
-#							print(variant_data)
-#							cursor.execute(add_variant_name,variant_data)
-#							connection.commit()
-#
-#						if agent_type == 'ComplexSubject' and match_key in authorized_heading:
-#							components_uri = subject_uri + '.madsrdf.rdf'
-#							print(components_uri)
-#
-#							component_tree = etree.fromstring(getRequest(components_uri,False,timesheet).content)
-#							component_list = component_tree.xpath("/rdf:RDF/madsrdf:ComplexSubject/madsrdf:componentList/*",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
-#							print("Component List:")
-#							print(component_list)
-#
-#							output_component_list = agent.xpath("./madsrdf:componentList/*",namespaces={ "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
-#							print("Output Component List:")
-#							print(output_component_list)
-#
-#							add_component = u'INSERT INTO Component (source_url, sequence_value, component_url) VALUES (%s, %s, %s)'
-#
-#							j = 0
-#							while j < len(component_list):
-#								component_url = component_list[j].xpath("./@rdf:about",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
-#								if component_url:
-#									cursor.execute('SELECT * FROM Component WHERE source_url = %s',(subject_uri,))
-#									if not cursor.rowcount:
-#										component_data = (subject_uri,j,component_url[0].encode('utf-8'))
-#										print(component_data)
-#										print(type(subject_uri))
-#										print(type(j))
-#										print(type(component_url[0].encode('utf-8')))
-#										cursor.execute(add_component,component_data)
-#										connection.commit()
-#									output_component_list[j].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',component_url[0])
-#								j = j + 1
-#						#http://id.loc.gov/authorities/subjects/sh2002011373.madsrdf.rdf
-#					i = i + 2
-#
-#				if match_not_found:
-#					new_blank_node = createBlankNode(agent,'subject')
-#					add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
-#					subject_data = (new_blank_node,match_key,agent_types[0].encode('utf-8'))
-#					cursor.execute(add_subject,subject_data)
-#					connection.commit()
 		else:
 			new_blank_node = createBlankNode(agent,'subject')
 			add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
@@ -530,124 +432,6 @@ def setTopicAgent(agent,cursor,connection,timesheet):
 				match_key = shortenMatchKey(agent,match_key,match_key_type,'madsrdf','http://www.loc.gov/mads/rdf/v1#')
 
 			getLOCID(agent,cursor,connection,match_key,agent_type,search_type,timesheet)
-
-#			found_topic_url = False
-#			topic_url = None
-#
-#			cursor.execute('SELECT * FROM Subject WHERE label = %s AND concept_type = %s',(match_key, 'http://www.loc.gov/mads/rdf/v1#' + agent_type))
-#			for table in cursor:
-#				print(table[0])
-#				topic_url = table[0]
-#				agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',topic_url)
-#				found_topic_url = True
-#
-#			if not found_topic_url:
-#				cursor.execute('SELECT * FROM Variant_Name WHERE variant_name = %s',(match_key,))
-#				for table in cursor:
-#					topic_url = table[0]
-#					agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',topic_url)
-#					found_topic_url = True
-#
-#			if found_topic_url:
-#				if agent_type == 'ComplexSubject':
-#					output_component_list = agent.xpath("./madsrdf:componentList/*",namespaces={ "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
-#					print("Output Component List:")
-#					print(output_component_list)
-#
-#					if output_component_list:
-#						cursor.execute('SELECT * FROM Component INNER JOIN Subject ON Component.component_url = Subject.url WHERE source_url = %s',(topic_url,))
-#						for table in cursor:
-#							print(table)
-#							print(type(str(output_component_list[table[1]].xpath('./*/text()')[0])))
-#							if table[1] < len(output_component_list) and table[4] == output_component_list[table[1]].xpath('./*/text()')[0].encode('utf-8'):
-#								output_component_list[table[1]].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',table[2])
-#			else:
-#				searchLOC(agent,cursor,connection,match_key,agent_type,search_type,timesheet)
-#				query_url = BASE_LC_URL + urllib.quote_plus(match_key) + '+rdftype:' + agent_type + '&q=cs%3Ahttp%3A%2F%2Fid.loc.gov%2Fauthorities%2F' + search_type
-#				print(query_url)
-#
-#				results_tree = etree.HTML(getRequest(query_url,False,timesheet).content)
-#				result_table = results_tree.xpath("//table[@class='id-std']/tbody/tr")
-#				match_not_found = True
-#				i = 0
-#				while i < len(result_table) and match_not_found:
-#					authorized_heading = result_table[i].xpath("./td/a/text()")
-#					print(authorized_heading)
-#					variant_headings = result_table[i+1].xpath("./td[@colspan='4']/text()")
-#					print(variant_headings)
-#					if len(variant_headings) > 0:
-#						variant_headings = map(normalizeVariant,variant_headings[0].split(';'))
-#					print(variant_headings)
-#					print(match_key, authorized_heading[0])
-#					print(match_key == authorized_heading[0])
-#
-#					if match_key in authorized_heading or match_key in variant_headings:
-#						print("Found " + match_key)
-#						subject_uri = 'http://id.loc.gov' + result_table[i].xpath("./td/a/@href")[0]
-#						print(subject_uri)
-#						agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',subject_uri)
-#						match_not_found = False
-#
-#						cursor.execute(u'SELECT * FROM Subject WHERE url = %s',(subject_uri,))
-#						if not cursor.rowcount:
-#							add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
-#							subject_data = (subject_uri,authorized_heading[0].encode('utf-8'),agent_types[0].encode('utf-8'))
-#							print(subject_data)
-#							print(type(subject_uri))
-#							print(type(authorized_heading[0].encode('utf-8')))
-#							print(type(agent_types[0].encode('utf-8')))
-#							cursor.execute(add_subject,subject_data)
-#							connection.commit()
-#						else:
-#							cursor.execute(u'INSERT INTO Variant_Name (url, variant_name) VALUES (%s, %s)',(subject_uri,authorized_heading[0].encode('utf-8')))
-#							connection.commit()
-#
-#						add_variant_name = u'INSERT INTO Variant_Name (url, variant_name) VALUES (%s, %s)'
-#						for variant in variant_headings:
-#							variant_data = (subject_uri,variant)
-#							print(variant_data)
-#							cursor.execute(add_variant_name,variant_data)
-#							connection.commit()
-#
-#						if agent_type == 'ComplexSubject' and match_key in authorized_heading:
-#							components_uri = subject_uri + '.madsrdf.rdf'
-#							print(components_uri)
-#
-#							component_tree = etree.fromstring(getRequest(components_uri,False,timesheet).content)
-#							component_list = component_tree.xpath("/rdf:RDF/madsrdf:ComplexSubject/madsrdf:componentList/*",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
-#							print("Component List:")
-#							print(component_list)
-#
-#							output_component_list = agent.xpath("./madsrdf:componentList/*",namespaces={ "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
-#							print("Output Component List:")
-#							print(output_component_list)
-#
-#							add_component = u'INSERT INTO Component (source_url, sequence_value, component_url) VALUES (%s, %s, %s)'
-#
-#							j = 0
-#							while j < len(component_list):
-#								component_url = component_list[j].xpath("./@rdf:about",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
-#								if component_url:
-#									cursor.execute('SELECT * FROM Component WHERE source_url = %s',(subject_uri,))
-#									if not cursor.rowcount:
-#										component_data = (subject_uri,j,component_url[0].encode('utf-8'))
-#										print(component_data)
-#										print(type(subject_uri))
-#										print(type(j))
-#										print(type(component_url[0].encode('utf-8')))
-#										cursor.execute(add_component,component_data)
-#										connection.commit()
-#									output_component_list[j].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',component_url[0])
-#								j = j + 1
-#						#http://id.loc.gov/authorities/subjects/sh2002011373.madsrdf.rdf
-#					i = i + 2
-#
-#				if match_not_found:
-#					new_blank_node = createBlankNode(agent,'subject')
-#					add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
-#					subject_data = (new_blank_node,match_key,agent_types[0].encode('utf-8'))
-#					cursor.execute(add_subject,subject_data)
-#					connection.commit()
 		else:
 			new_blank_node = createBlankNode(agent,'subject')
 			add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
@@ -775,6 +559,36 @@ def setContributionAgent(agent,countries,cursor,connection,timesheet):
 
 	print('^-CONTRIBUTION AGENT--CONTRIBUTION AGENT--CONTRIBUTION AGENT--CONTRIBUTION AGENT-^')
 
+def getWorldCatData(works,work_ids,timesheet):
+	for work in works:
+		placeholder_work_id = work.xpath("./@rdf:about", namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })[0]
+		instances = root.xpath("/rdf:RDF/bf:Instance[bf:instanceOf/@rdf:resource='" + placeholder_work_id + "']", namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "bf": "http://id.loc.gov/ontologies/bibframe/" })[0]
+		instance_url = instances.xpath("@rdf:about", namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })[0]
+
+		try:
+			print(work_ids[instance_url])
+		except:
+			if 'worldcat.org' in instance_url:
+				result = getRequest(instance_url + '.jsonld',True,timesheet)
+
+				if result:
+#					print(result.content)
+					print(len(result.content))
+					try:
+						result = result.json()
+					except:
+						print(result.content)
+						print(instance_url)
+						sys.exit()
+#					print(result['@graph'])
+					print(len(result['@graph']))
+					for r in result['@graph']:
+						if 'exampleOfWork' in r:
+							work_ids[instance_url] = r['exampleOfWork']
+				else:
+					work_ids[instance_url] = instance_url + "1"
+			else:
+				work_ids[instance_url] = instance_url + "1"
 
 def postConversionTransform(file_name):
 	start_time = datetime.datetime.now().time()
@@ -798,6 +612,9 @@ def postConversionTransform(file_name):
 	last_loaded_worldcat_record = None
 
 	timesheet = { 'worldcat': { 'calls': 0, 'time': timedelta(0) }, 'loc': { 'calls': 0, 'time': timedelta(0) }, 'viaf': { 'calls': 0, 'time': timedelta(0) } }
+
+#	work_ids = {}
+#	getWorldCatData(works,work_ids,timesheet)
 
 	for work in works:
 		print('V-WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK-V')
@@ -864,7 +681,7 @@ def postConversionTransform(file_name):
 		if duration < timedelta(0):
 			duration += timedelta(days=1)
 
-		output_array = [file_name[file_name.rfind('/')+1:],duration,duration/10000,timesheet['worldcat']['calls'],timesheet['worldcat']['time'],timesheet['worldcat']['time']/timesheet['worldcat']['calls'],timesheet['loc']['calls'],timesheet['loc']['time'],timesheet['loc']['time']/timesheet['loc']['calls'],timesheet['viaf']['calls'],timesheet['viaf']['time'],timesheet['viaf']['time']/timesheet['viaf']['calls']]
+		output_array = [file_name[file_name.rfind('/')+1:],duration,duration/10000,timesheet['worldcat']['calls'],timesheet['worldcat']['time'],(timesheet['worldcat']['time']/timesheet['worldcat']['calls'] if timesheet['worldcat']['calls'] > 0 else timesheet['worldcat']['time']),timesheet['loc']['calls'],timesheet['loc']['time'],(timesheet['loc']['time']/timesheet['loc']['calls'] if timesheet['loc']['calls'] > 0 else timesheet['loc']['time']),timesheet['viaf']['calls'],timesheet['viaf']['time'],(timesheet['viaf']['time']/timesheet['viaf']['calls'] if timesheet['viaf']['calls'] > 0 else timesheet['viaf']['time'])]
 
 		writer = csv.writer(timesheet_file, delimiter=',')
 		writer.writerow(output_array)
