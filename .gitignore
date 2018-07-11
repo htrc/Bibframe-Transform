@@ -1,5 +1,6 @@
 .DS_Store
 test_input.txt
+two_oclc.xml
 viaf_index*
 *.json
 *.pyc
@@ -21,3 +22,6 @@ viaf_index*
 /test_xml*
 /notEmblematicaOnline*
 /workset_volumes*
+/old_trimmed_all_volumes_json*
+/to_be_redone*
+/test_diacritics*
