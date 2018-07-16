@@ -428,14 +428,28 @@ def setSubjectAgent(agent,cursor,connection,timesheet):
 			getLOCID(agent,cursor,connection,match_key,agent_type,search_type,timesheet)
 		else:
 			new_blank_node = createBlankNode(agent,'subject')
-			add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
-			subject_data = (new_blank_node,None,'http://www.loc.gov/mads/rdf/v1#' + agent_type)
 
-			timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_subject,subject_data)
-			timeSQLCall(timesheet,timesheet_domain,connection.commit)
+#			Check to see if blank node already exists
+			find_subject = u'SELECT * FROM Subject WHERE url = %s AND label = %s'
+			find_data = (new_blank_node,None)
 
-#			cursor.execute(add_subject,subject_data)
-#			connection.commit()
+			found_blank_node = False
+			timeSQLCall(timesheet,timesheet_domain,cursor.execute,find_subject,find_data)
+			for table in cursor:
+				logging.debug(table[0])
+				agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',new_blank_node)
+				found_blank_node = True
+
+			if not new_blank_node:
+				add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
+				subject_data = (new_blank_node,None,'http://www.loc.gov/mads/rdf/v1#' + agent_type)
+				logging.debug(subject_data)
+
+				timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_subject,subject_data)
+				timeSQLCall(timesheet,timesheet_domain,connection.commit)
+
+#				cursor.execute(add_subject,subject_data)
+	#			connection.commit()
 
 	logging.debug('^---SUBJECT AGENT--SUBJECT AGENT--SUBJECT AGENT--SUBJECT AGENT--SUBJECT AGENT----^')
 
@@ -483,14 +497,27 @@ def setTopicAgent(agent,cursor,connection,timesheet):
 			getLOCID(agent,cursor,connection,match_key,agent_type,search_type,timesheet)
 		else:
 			new_blank_node = createBlankNode(agent,'subject')
-			add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
-			subject_data = (new_blank_node,None,'http://www.loc.gov/mads/rdf/v1#' + agent_type)
 
-			timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_subject,subject_data)
-			timeSQLCall(timesheet,timesheet_domain,connection.commit)
+#			Check to see if blank node already exists
+			find_subject = u'SELECT * FROM Subject WHERE url = %s AND label = %s'
+			find_data = (new_blank_node,None)
 
-#			cursor.execute(add_subject,subject_data)
-#			connection.commit()
+			found_blank_node = False
+			timeSQLCall(timesheet,timesheet_domain,cursor.execute,find_subject,find_data)
+			for table in cursor:
+				logging.debug(table[0])
+				agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',new_blank_node)
+				found_blank_node = True
+
+			if not new_blank_node:
+				add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
+				subject_data = (new_blank_node,None,'http://www.loc.gov/mads/rdf/v1#' + agent_type)
+
+				timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_subject,subject_data)
+				timeSQLCall(timesheet,timesheet_domain,connection.commit)
+
+#				cursor.execute(add_subject,subject_data)
+#				connection.commit()
 
 	logging.debug('^--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC--TOPIC---^')
 
