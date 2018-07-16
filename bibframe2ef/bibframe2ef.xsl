@@ -78,9 +78,14 @@
 				<xsl:if test="/rdf:RDF/bf:Item/htrc:contentProviderAgent/@rdf:resource">
 					<xsl:text>, &#10;		"sourceInstitution": {</xsl:text>
 					<xsl:text> &#10;			"name" : "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/htrc:contentProviderAgent/@rdf:resource,52)" /><xsl:text>"</xsl:text>
-					<xsl:text> &#10;			"type": "Organization"</xsl:text>
-					<xsl:text>, &#10;		}</xsl:text>
+					<xsl:text>, &#10;			"type": "Organization"</xsl:text>
+					<xsl:text> &#10;		}</xsl:text>
 				</xsl:if>
+				<xsl:text>, &#10;		"mainEntityOfPage": [</xsl:text>
+				<xsl:text> &#10;			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/bf:itemOf/@rdf:resource,30)" /><xsl:text>.json"</xsl:text>
+				<xsl:text>, &#10;			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/bf:itemOf/@rdf:resource,30)" /><xsl:text>.json"</xsl:text>
+				<xsl:text>, &#10;			"https://catalog.hathitrust.org/api/volumes/full/htid/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/@rdf:about,28)" /><xsl:text>.json"</xsl:text>
+				<xsl:text> &#10;		]</xsl:text>
 				<xsl:text> &#10;	}</xsl:text>
 				<xsl:text>&#10;}</xsl:text>
 		</xsl:result-document>

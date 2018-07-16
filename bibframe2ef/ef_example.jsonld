@@ -1,0 +1,62 @@
+{ 
+	"@context": [ 
+		"http://schema.org", 
+		{ 
+			"htrc": "http://wcsa.htrc.illinois.edu/", 
+			"accessProfile": { 
+				"@id": "htrc:accessProfile" 
+			}, 
+			"title": "name", 
+			"enumerationChronology": { 
+				"@id": "htrc:enumerationChronology" 
+			}, 
+			"pubDate": "datePublished", 
+			"pubPlace": "locationCreated", 
+			"language": "inLanguage", 
+			"rightsAttributes": { 
+				"@id": "htrc:accessRights" 
+			}, 
+			"contributor": { 
+				"@id": "schema:contributor", 
+				"@container": "@list" 
+			}, 
+			"sourceInstitution": "provider", 
+			"lastUpdateDate": "dateModified" 
+		} 
+	], 
+	"type": "Dataset", 
+	"schemaVersion": "https://wiki.htrc.illinois.edu/display/COM/Extracted+Features+Dataset_2.0", 
+	"sourceInstitution": "htrc", 
+	"about": { 
+		"id": "http://hdl.handle.net/2027/nyp.33433000357651", 
+		"type": "Text", 
+		"isAccessibleForFree": "TRUE" 
+		"title": "Vollständiges Diarium von der höchst-beglückten Erwehlung des allerdurchlauchtigsten grossmächtigsten und unüberwindlichsten Fürsten und Herrn, Herrn Franciscus Königs zu Lothringen und Saar, Gross-Herzogs zu Toscana, Herzogs zu Calabern, Seldern, Montserrat, inzwischen zu Teschen, Fürsten zu Charleville, Marggrafen zu Pont a Mousson und Komenn, Grafen zu Provinz Vaudemont, Blanckenburg, Zütphen, Jaarweden, Jalm und Falckenstein, ac., ac., zum Römischen König und Kayser : worin die merckwürdigsten Handlungen und Begebeniten enthalten, mit Kupfferstischen und schematischen Vorstellungen versehen : nebst einer Vorrede von den Vorzügen des regierenden Hauses bey den Teutschen Königs- und Kayser-Wahlen.", 
+		"author": { 
+			"type": "Person" 
+			"id": "http://www.viaf.org/viaf/266519174" 
+			"name": "Francis I, Holy Roman Emperor, 1708-1765." 
+		}, 
+		"contributor": { 
+			"type": "Person" 
+			"id": "http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/012314990270028" 
+			"name": "Olenschlager, Johann Daniel von, 1711-1778." 
+		}, 
+		"publisher": { 
+			"type": "Organization", 
+			"name": "Verlegt von Johann David Jung" 
+		}, 
+		"pubPlace": "gw", 
+		"language": "ger", 
+		"rightsAttributes": "pd", 
+		"sourceInstitution": { 
+			"name" : "NYP", 
+			"type": "Organization" 
+		}, 
+		"mainEntityOfPage": [ 
+			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/549525959.json", 
+			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/549525959.json", 
+			"https://catalog.hathitrust.org/api/volumes/full/htid/nyp.33433000357651.json" 
+		] 
+	}
+}
