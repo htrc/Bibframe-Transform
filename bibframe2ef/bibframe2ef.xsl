@@ -37,6 +37,10 @@
 				<xsl:text> &#10;			}</xsl:text>
 				<xsl:text>, &#10;			"sourceInstitution": "provider"</xsl:text>
 				<xsl:text>, &#10;			"lastUpdateDate": "dateModified"</xsl:text>
+				<xsl:text>, &#10;			"identifier": {</xsl:text>
+				<xsl:text> &#10;				"@id": "schema:identifier"</xsl:text>
+				<xsl:text>, &#10;				"@container": "@list"</xsl:text>
+				<xsl:text> &#10;			}</xsl:text>
 				<xsl:text> &#10;		}</xsl:text>
 				<xsl:text> &#10;	]</xsl:text>
 				<xsl:text>, &#10;	"type": "Dataset"</xsl:text>
