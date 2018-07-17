@@ -32,41 +32,56 @@
 	"schemaVersion": "https://wiki.htrc.illinois.edu/display/COM/Extracted+Features+Dataset_2.0", 
 	"sourceInstitution": "htrc", 
 	"about": { 
-		"id": "http://hdl.handle.net/2027/nyp.33433000357651", 
+		"id": "http://hdl.handle.net/2027/nyp.33433000355994", 
 		"type": "Text", 
 		"isAccessibleForFree": "TRUE" 
-		"title": "Vollständiges Diarium von der höchst-beglückten Erwehlung des allerdurchlauchtigsten grossmächtigsten und unüberwindlichsten Fürsten und Herrn, Herrn Franciscus Königs zu Lothringen und Saar, Gross-Herzogs zu Toscana, Herzogs zu Calabern, Seldern, Montserrat, inzwischen zu Teschen, Fürsten zu Charleville, Marggrafen zu Pont a Mousson und Komenn, Grafen zu Provinz Vaudemont, Blanckenburg, Zütphen, Jaarweden, Jalm und Falckenstein, ac., ac., zum Römischen König und Kayser : worin die merckwürdigsten Handlungen und Begebeniten enthalten, mit Kupfferstischen und schematischen Vorstellungen versehen : nebst einer Vorrede von den Vorzügen des regierenden Hauses bey den Teutschen Königs- und Kayser-Wahlen.", 
+		"title": "Rerum Germanicarum scriptores aliquot insignes, qui gesta sub regibus & imperatoribus Teutonicis, iam inde à Carolo M. usque ad Fridericum III. imp. perpetua ferè serie, suis quique seculis, litteris mandata posteritati reliquerunt, tomus primus[-tertius] nunc denuo recognitus, additis scriptoribus aliis antea ineditis. Cum glossario, locis aliorum auctorum parallelis, notis ac indice." 
+		"enumerationChronology": "v. 3", 
 		"author": { 
 			"type": "Person" 
-			"id": "http://www.viaf.org/viaf/266519174" 
-			"name": "Francis I, Holy Roman Emperor, 1708-1765." 
+			"id": "http://www.viaf.org/viaf/49258063" 
+			"name": "Freher, Marquard, 1565-1614." 
 		}, 
 		"contributor": { 
 			"type": "Person" 
-			"id": "http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/012314990270028" 
-			"name": "Olenschlager, Johann Daniel von, 1711-1778." 
+			"id": "http://www.viaf.org/viaf/41920698" 
+			"name": "Struve, Burkhard Gotthelf, 1671-1738." 
 		}, 
 		"publisher": { 
 			"type": "Organization", 
-			"name": "Verlegt von Johann David Jung" 
+			"name": "Sumptibus J. R. Dulsseckeri" 
 		}, 
 		"pubPlace": [ 
-			"http://id.loc.gov/vocabulary/countries/gw", 
-			"Franckfurt am Mayn" 
+			"http://id.loc.gov/vocabulary/countries/xx", 
+			"Argentorati" 
 		], 
-		"language": [ 
-			"ger",  
-			"lat" 
-		], 
+		"language": "lat", 
 		"rightsAttributes": "pd", 
 		"sourceInstitution": { 
-			"name" : "NYP", 
+			"name": "NYP", 
 			"type": "Organization" 
 		}, 
 		"mainEntityOfPage": [ 
-			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/549525959.json", 
-			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/549525959.json", 
-			"https://catalog.hathitrust.org/api/volumes/full/htid/nyp.33433000357651.json" 
-		] 
+			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/1988560.json", 
+			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/1988560.json", 
+			"https://catalog.hathitrust.org/api/volumes/full/htid/nyp.33433000355994.json" 
+		], 
+		"passedValue": "Lcc", 
+		"identifier": { 
+			"type": "PropertyValue", 
+			"propertyID": "lcc", 
+			"value": "DD3 .F87" 
+		}, 
+		"identifier": { 
+			"type": "PropertyValue", 
+			"propertyID": "lcc", 
+			"value": "DD3 .F87 1717" 
+		}, 
+		"passedValue": "Lccn", 
+		"identifier": { 
+			"type": "PropertyValue", 
+			"propertyID": "lccn", 
+			"value": "/rdf:RDF/bf:Instance/bf:identifiedBy/bf:Lccn" 
+		} 
 	}
 }
