@@ -21,7 +21,11 @@
 				"@container": "@list" 
 			}, 
 			"sourceInstitution": "provider", 
-			"lastUpdateDate": "dateModified" 
+			"lastUpdateDate": "dateModified", 
+			"identifier": { 
+				"@id": "schema:identifier", 
+				"@container": "@list" 
+			} 
 		} 
 	], 
 	"type": "Dataset", 
@@ -46,8 +50,14 @@
 			"type": "Organization", 
 			"name": "Verlegt von Johann David Jung" 
 		}, 
-		"pubPlace": "gw", 
-		"language": "ger", 
+		"pubPlace": [ 
+			"http://id.loc.gov/vocabulary/countries/gw", 
+			"Franckfurt am Mayn" 
+		], 
+		"language": [ 
+			"ger",  
+			"lat" 
+		], 
 		"rightsAttributes": "pd", 
 		"sourceInstitution": { 
 			"name" : "NYP", 

@@ -51,11 +51,11 @@
 				<xsl:text>, &#10;		"type": "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Work/rdf:type/@rdf:resource,39)" /><xsl:text>"</xsl:text>
 				<xsl:text>, &#10;		"isAccessibleForFree": "</xsl:text>
 					<xsl:choose>
-						<xsl:when test="/rdf:RDF/bf:Item/dct:accessRights/text() = 'ic'">
-							<xsl:text>FALSE</xsl:text>
+						<xsl:when test="/rdf:RDF/bf:Item/dct:accessRights/text() = 'pd'">
+							<xsl:text>TRUE</xsl:text>
 						</xsl:when>
 						<xsl:otherwise>
-							<xsl:text>TRUE</xsl:text>
+							<xsl:text>FALSE</xsl:text>
 						</xsl:otherwise>
 					</xsl:choose>
 				<xsl:text>"</xsl:text>
@@ -70,12 +70,50 @@
 				<xsl:text> &#10;			"type": "Organization"</xsl:text>
 				<xsl:text>, &#10;			"name": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label/text()" /><xsl:text>"</xsl:text>
 				<xsl:text> &#10;		}</xsl:text>
-				<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about">
-					<xsl:text>, &#10;		"pubPlace": "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about,40)" /><xsl:text>"</xsl:text>
-				</xsl:if>
-				<xsl:if test="/rdf:RDF/bf:Work/bf:language/bf:Language/@rdf:about">
-					<xsl:text>, &#10;		"language": "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Work/bf:language/bf:Language/@rdf:about,40)" /><xsl:text>"</xsl:text>
-				</xsl:if>
+				<xsl:choose>
+					<xsl:when test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about and /rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/rdfs:label">
+						<xsl:text>, &#10;		"pubPlace": [</xsl:text>
+						<xsl:text> &#10;			"</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about" /><xsl:text>"</xsl:text>
+						<xsl:text>, &#10;			"</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/rdfs:label/text()" /><xsl:text>"</xsl:text>
+						<xsl:text> &#10;		]</xsl:text>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:choose>
+							<xsl:when test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about">
+								<xsl:text>, &#10;		"pubPlace": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about" /><xsl:text>"</xsl:text>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/rdfs:label">
+									<xsl:text>, &#10;		"pubPlace": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/rdfs:label/text()" /><xsl:text>"</xsl:text>
+								</xsl:if>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:otherwise>
+				</xsl:choose>
+				<xsl:choose>
+					<xsl:when test="/rdf:RDF/bf:Work/bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource">
+						<xsl:choose>
+							<xsl:when test="count(/rdf:RDF/bf:Work/bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource) > 1">
+								<xsl:text>, &#10;		"language": [</xsl:text>
+								<xsl:for-each select="/rdf:RDF/bf:Work/bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource">
+									<xsl:text> &#10;			"</xsl:text><xsl:value-of select="substring(.,40)" /><xsl:text>"</xsl:text>
+									<xsl:if test="position() != last()">
+										<xsl:text>, </xsl:text>
+									</xsl:if>
+								</xsl:for-each>
+								<xsl:text> &#10;		]</xsl:text>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:text>, &#10;		"language": "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Work/bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource,40)" /><xsl:text>"</xsl:text>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:if test="/rdf:RDF/bf:Work/bf:language/bf:Language/@rdf:about">
+							<xsl:text>, &#10;		"language": "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Work/bf:language/bf:Language/@rdf:about,40)" /><xsl:text>"</xsl:text>
+						</xsl:if>
+					</xsl:otherwise>
+				</xsl:choose>
 				<xsl:if test="/rdf:RDF/bf:Item/dct:accessRights">
 					<xsl:text>, &#10;		"rightsAttributes": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Item/dct:accessRights/text()" /><xsl:text>"</xsl:text>
 				</xsl:if>
