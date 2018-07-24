@@ -1,0 +1,378 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:bf="http://id.loc.gov/ontologies/bibframe/" xmlns:bflc="http://id.loc.gov/ontologies/bflc/" xmlns:madsrdf="http://www.loc.gov/mads/rdf/v1#" xmlns:dct="http://purl.org/dc/terms/" xmlns:htrc="http://wcsa.htrc.illinois.edu/">
+  <bf:Work rdf:about="http://worldcat.org/entity/work/id/1881802223">
+    <bf:adminMetadata>
+      <bf:AdminMetadata>
+        <bf:generationProcess>
+          <bf:GenerationProcess>
+            <rdfs:label>DLC marc2bibframe2 v1.4.0-SNAPSHOT: 2018-06-30T13:16:01-05:00</rdfs:label>
+          </bf:GenerationProcess>
+        </bf:generationProcess>
+        <bf:status>
+          <bf:Status>
+            <bf:code>c</bf:code>
+          </bf:Status>
+        </bf:status>
+        <bflc:encodingLevel>
+          <bflc:EncodingLevel>
+            <bf:code>f</bf:code>
+          </bflc:EncodingLevel>
+        </bflc:encodingLevel>
+        <bf:descriptionConventions>
+          <bf:DescriptionConventions>
+            <bf:code>aacr</bf:code>
+          </bf:DescriptionConventions>
+        </bf:descriptionConventions>
+        <bf:identifiedBy>
+          <bf:Local>
+            <rdf:value>012336038</rdf:value>
+          </bf:Local>
+        </bf:identifiedBy>
+        <bf:source>
+          <bf:Source>
+            <bf:code>MiAaHDL</bf:code>
+          </bf:Source>
+        </bf:source>
+        <bf:changeDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-04-30T00:00:00</bf:changeDate>
+        <bf:creationDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1984-09-06</bf:creationDate>
+        <bf:note>
+          <bf:Note>
+            <bf:noteType>metadata entry convention</bf:noteType>
+            <rdfs:label>0 - successive</rdfs:label>
+          </bf:Note>
+        </bf:note>
+        <bf:source>
+          <bf:Source>
+            <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Agent"/>
+            <rdfs:label>LYU</rdfs:label>
+          </bf:Source>
+        </bf:source>
+        <bf:source>
+          <bf:Source>
+            <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Agent"/>
+            <rdfs:label>LYU</rdfs:label>
+          </bf:Source>
+        </bf:source>
+        <bf:descriptionModifier>
+          <bf:Agent>
+            <rdfs:label>AIP</rdfs:label>
+          </bf:Agent>
+        </bf:descriptionModifier>
+        <bf:descriptionModifier>
+          <bf:Agent>
+            <rdfs:label>NSD</rdfs:label>
+          </bf:Agent>
+        </bf:descriptionModifier>
+        <bf:descriptionModifier>
+          <bf:Agent>
+            <rdfs:label>GPO</rdfs:label>
+          </bf:Agent>
+        </bf:descriptionModifier>
+        <bf:descriptionModifier>
+          <bf:Agent>
+            <rdfs:label>m/c</rdfs:label>
+          </bf:Agent>
+        </bf:descriptionModifier>
+        <bf:descriptionModifier>
+          <bf:Agent>
+            <rdfs:label>OCL</rdfs:label>
+          </bf:Agent>
+        </bf:descriptionModifier>
+        <bf:descriptionModifier>
+          <bf:Agent>
+            <rdfs:label>NST</rdfs:label>
+          </bf:Agent>
+        </bf:descriptionModifier>
+        <bf:descriptionModifier>
+          <bf:Agent>
+            <rdfs:label>CLU</rdfs:label>
+          </bf:Agent>
+        </bf:descriptionModifier>
+        <bf:descriptionAuthentication>
+          <bf:DescriptionAuthentication rdf:about="http://id.loc.gov/vocabulary/marcauthen/nsdp"/>
+        </bf:descriptionAuthentication>
+      </bf:AdminMetadata>
+    </bf:adminMetadata>
+    <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Text"/>
+    <bf:genreForm>
+      <bf:GenreForm rdf:about="http://id.loc.gov/vocabulary/marcgt/doc">
+        <rdfs:label>document (computer)</rdfs:label>
+      </bf:GenreForm>
+    </bf:genreForm>
+    <bf:colorContent>
+      <bf:ColorContent rdf:about="http://id.loc.gov/vocabulary/mcolor/blw">
+        <rdfs:label>black and white</rdfs:label>
+      </bf:ColorContent>
+    </bf:colorContent>
+    <bf:language>
+      <bf:Language rdf:about="http://id.loc.gov/vocabulary/languages/eng"/>
+    </bf:language>
+    <bf:genreForm>
+      <bf:GenreForm rdf:about="http://id.loc.gov/vocabulary/marcgt/gov">
+        <rdfs:label>federal or national government publication</rdfs:label>
+      </bf:GenreForm>
+    </bf:genreForm>
+    <bf:notation>
+      <bf:Script>
+        <bf:code>a</bf:code>
+        <rdfs:label>basic roman</rdfs:label>
+      </bf:Script>
+    </bf:notation>
+    <bf:classification>
+      <bf:ClassificationDdc>
+        <bf:classificationPortion>358$211</bf:classificationPortion>
+        <bf:edition>abridged</bf:edition>
+      </bf:ClassificationDdc>
+    </bf:classification>
+    <rdfs:label>Air Force engineering &amp; services quarterly (Tyndall Air Force Base (Fla.) : 1984)</rdfs:label>
+    <bf:title>
+      <bf:Title>
+        <bflc:title30MatchKey>Air Force engineering &amp; services quarterly (Tyndall Air Force Base (Fla.) : 1984)</bflc:title30MatchKey>
+        <bflc:title30MarcKey>1300 $aAir Force engineering &amp; services quarterly (Tyndall Air Force Base (Fla.) : 1984)</bflc:title30MarcKey>
+        <rdfs:label>Air Force engineering &amp; services quarterly (Tyndall Air Force Base (Fla.) : 1984)</rdfs:label>
+        <bflc:titleSortKey>Air Force engineering &amp; services quarterly (Tyndall Air Force Base (Fla.) : 1984)</bflc:titleSortKey>
+        <bf:mainTitle>Air Force engineering &amp; services quarterly (Tyndall Air Force Base (Fla.) : 1984)</bf:mainTitle>
+      </bf:Title>
+    </bf:title>
+    <bf:subject>
+      <bf:Agent rdf:about="http://id.loc.gov/authorities/subjects/sh85140563">
+        <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Jurisdiction"/>
+        <rdf:type rdf:resource="http://www.loc.gov/mads/rdf/v1#ComplexSubject"/>
+        <madsrdf:authoritativeLabel>United States. Air Force--Military construction operations--Periodicals.</madsrdf:authoritativeLabel>
+        <madsrdf:isMemberofMADSScheme rdf:resource="http://id.loc.gov/authorities/subjects"/>
+        <bf:source>
+          <bf:Source>
+            <bf:code>lcsh</bf:code>
+          </bf:Source>
+        </bf:source>
+        <bflc:name10MatchKey>United States. Air Force</bflc:name10MatchKey>
+        <bflc:name10MarcKey>61010$aUnited States.$bAir Force$xMilitary construction operations$vPeriodicals.</bflc:name10MarcKey>
+        <rdfs:label>United States. Air Force</rdfs:label>
+      </bf:Agent>
+    </bf:subject>
+    <bf:contribution>
+      <bf:Contribution>
+        <bf:agent>
+          <bf:Agent rdf:about="http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/009645513271019">
+            <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Organization"/>
+            <bflc:name10MatchKey>Air Force Engineering and Services Center (U.S.)</bflc:name10MatchKey>
+            <bflc:name10MarcKey>7102 $aAir Force Engineering and Services Center (U.S.)</bflc:name10MarcKey>
+            <rdfs:label>Air Force Engineering and Services Center (U.S.)</rdfs:label>
+          </bf:Agent>
+        </bf:agent>
+        <bf:role>
+          <bf:Role rdf:about="http://id.loc.gov/vocabulary/relators/ctb"/>
+        </bf:role>
+      </bf:Contribution>
+    </bf:contribution>
+    <bf:continues>
+      <bf:Work rdf:about="_:b012336038078032">
+        <bf:identifiedBy>
+          <bf:Identifier>
+            <rdf:value>sn 86036464</rdf:value>
+            <bf:source>
+              <bf:Source>
+                <rdfs:label>DLC</rdfs:label>
+              </bf:Source>
+            </bf:source>
+          </bf:Identifier>
+        </bf:identifiedBy>
+        <bf:identifiedBy>
+          <bf:Identifier>
+            <rdf:value>10523917</rdf:value>
+            <bf:source>
+              <bf:Source>
+                <rdfs:label>OCoLC</rdfs:label>
+              </bf:Source>
+            </bf:source>
+          </bf:Identifier>
+        </bf:identifiedBy>
+        <bf:hasInstance>
+          <bf:Instance rdf:about="_:b012336038178032">
+            <bf:title>
+              <bf:Title>
+                <rdfs:label>Quarterly (Air Force Engineering and Services Center (U.S.))</rdfs:label>
+              </bf:Title>
+            </bf:title>
+            <bf:instanceOf rdf:resource="_:b012336038078032"/>
+          </bf:Instance>
+        </bf:hasInstance>
+      </bf:Work>
+    </bf:continues>
+    <bf:hasInstance rdf:resource="http://www.worldcat.org/oclc/11125184"/>
+  </bf:Work>
+  <bf:Instance rdf:about="http://www.worldcat.org/oclc/11125184">
+    <bf:issuance>
+      <bf:Issuance rdf:about="http://id.loc.gov/vocabulary/issuance/serl"/>
+    </bf:issuance>
+    <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Electronic"/>
+    <bf:media>
+      <bf:Media rdf:about="http://id.loc.gov/vocabulary/mediaTypes/c">
+        <rdfs:label>computer</rdfs:label>
+      </bf:Media>
+    </bf:media>
+    <bf:soundContent>
+      <bf:SoundContent>
+        <rdfs:label>silent</rdfs:label>
+      </bf:SoundContent>
+    </bf:soundContent>
+    <bf:provisionActivity>
+      <bf:ProvisionActivity>
+        <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Publication"/>
+        <bf:date rdf:datatype="http://id.loc.gov/datatypes/edtf">1984/1986</bf:date>
+        <bf:place>
+          <bf:Place rdf:about="http://id.loc.gov/vocabulary/countries/flu"/>
+        </bf:place>
+        <bf:place>
+          <bf:Place>
+            <rdfs:label>Tyndall AFB, Fla.</rdfs:label>
+          </bf:Place>
+        </bf:place>
+        <bf:place>
+          <bf:Place>
+            <rdfs:label>Washington, D.C.</rdfs:label>
+          </bf:Place>
+        </bf:place>
+        <bf:agent>
+          <bf:Agent>
+            <rdfs:label>HQ Air Force Engineering and Services Center</rdfs:label>
+          </bf:Agent>
+        </bf:agent>
+        <bf:agent>
+          <bf:Agent>
+            <rdfs:label>Supt. of Docs., U.S. G.P.O.</rdfs:label>
+          </bf:Agent>
+        </bf:agent>
+        <bf:date>-[1986</bf:date>
+      </bf:ProvisionActivity>
+    </bf:provisionActivity>
+    <bf:provisionActivityStatement>[Tyndall AFB, Fla. : HQ Air Force Engineering and Services Center ; Washington, D.C. : Supt. of Docs., U.S. G.P.O., -[1986]</bf:provisionActivityStatement>
+    <bf:note>
+      <bf:Note>
+        <rdfs:label>Ceased publication</rdfs:label>
+      </bf:Note>
+    </bf:note>
+    <bf:frequency>
+      <bf:Frequency rdf:about="http://id.loc.gov/vocabulary/frequencies/grt">
+        <rdfs:label>quarterly</rdfs:label>
+      </bf:Frequency>
+    </bf:frequency>
+    <bf:genreForm>
+      <bf:GenreForm rdf:about="http://id.loc.gov/vocabulary/marcgt/per">
+        <rdfs:label>periodical</rdfs:label>
+      </bf:GenreForm>
+    </bf:genreForm>
+    <bf:frequency>
+      <bf:Frequency>
+        <rdfs:label>regular</rdfs:label>
+      </bf:Frequency>
+    </bf:frequency>
+    <bf:identifiedBy>
+      <bf:Lccn>
+        <rdf:value>sn 85009206 </rdf:value>
+      </bf:Lccn>
+    </bf:identifiedBy>
+    <bf:identifiedBy>
+      <bf:Issn>
+        <rdf:value>0883-0193</rdf:value>
+      </bf:Issn>
+    </bf:identifiedBy>
+    <bf:identifiedBy>
+      <bf:Local>
+        <rdf:value>sdr-ucla3768867</rdf:value>
+      </bf:Local>
+    </bf:identifiedBy>
+    <bf:identifiedBy>
+      <bf:Local>
+        <rdf:value>3768867</rdf:value>
+      </bf:Local>
+    </bf:identifiedBy>
+    <bf:identifiedBy>
+      <bf:Local>
+        <rdf:value>11125184</rdf:value>
+        <bf:source>
+          <bf:Source>
+            <rdfs:label>OCoLC</rdfs:label>
+          </bf:Source>
+        </bf:source>
+      </bf:Local>
+    </bf:identifiedBy>
+    <bf:classification>
+      <bf:Classification>
+        <rdfs:label>D 301.65:</rdfs:label>
+        <bf:source>
+          <bf:Source>
+            <rdfs:label>sudocs</rdfs:label>
+          </bf:Source>
+        </bf:source>
+      </bf:Classification>
+    </bf:classification>
+    <bf:title>
+      <bf:Title>
+        <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/VariantTitle"/>
+        <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/KeyTitle"/>
+        <rdfs:label>Air Force engineering &amp; services quarterly (1984)</rdfs:label>
+        <bflc:titleSortKey>Air Force engineering &amp; services quarterly (1984)</bflc:titleSortKey>
+        <bf:mainTitle>Air Force engineering &amp; services quarterly</bf:mainTitle>
+        <bf:qualifier>1984</bf:qualifier>
+      </bf:Title>
+    </bf:title>
+    <rdfs:label>Air Force engineering &amp; services quarterly.</rdfs:label>
+    <bf:title>
+      <bf:Title>
+        <rdfs:label>Air Force engineering &amp; services quarterly.</rdfs:label>
+        <bflc:titleSortKey>Air Force engineering &amp; services quarterly.</bflc:titleSortKey>
+        <bf:mainTitle>Air Force engineering &amp; services quarterly</bf:mainTitle>
+      </bf:Title>
+    </bf:title>
+    <bf:title>
+      <bf:Title>
+        <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/VariantTitle"/>
+        <bf:variantType>running</bf:variantType>
+        <rdfs:label>Engineering &amp; services quarterly</rdfs:label>
+        <bflc:titleSortKey>Engineering &amp; services quarterly</bflc:titleSortKey>
+        <bf:mainTitle>Engineering &amp; services quarterly</bf:mainTitle>
+        <bf:date>spring 1984-198</bf:date>
+      </bf:Title>
+    </bf:title>
+    <bf:title>
+      <bf:Title>
+        <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/VariantTitle"/>
+        <bf:variantType>portion</bf:variantType>
+        <rdfs:label>Air Force engineering and services quarterly</rdfs:label>
+        <bflc:titleSortKey>Air Force engineering and services quarterly</bflc:titleSortKey>
+        <bf:mainTitle>Air Force engineering and services quarterly</bf:mainTitle>
+      </bf:Title>
+    </bf:title>
+    <bf:frequency>
+      <bf:Frequency>
+        <rdfs:label>Quarterly</rdfs:label>
+      </bf:Frequency>
+    </bf:frequency>
+    <bf:firstIssue>Vol. 25, no. 1 (spring 1984)</bf:firstIssue>
+    <bf:lastIssue>v. 27, no. 2 (summer, 1986).</bf:lastIssue>
+    <bf:note>
+      <bf:Note>
+        <rdfs:label>Title from cover.</rdfs:label>
+      </bf:Note>
+    </bf:note>
+    <bf:hasSeries>
+      <bf:Instance>
+        <rdfs:label>AFRP</rdfs:label>
+        <bf:seriesStatement>AFRP ; 85-1</bf:seriesStatement>
+        <bf:seriesEnumeration>85-1</bf:seriesEnumeration>
+      </bf:Instance>
+    </bf:hasSeries>
+    <bf:instanceOf rdf:resource="http://worldcat.org/entity/work/id/1881802223"/>
+    <bf:hasItem rdf:resource="http://hdl.handle.net/2027/uc1.l0052148335"/>
+  </bf:Instance>
+  <bf:Item rdf:about="http://hdl.handle.net/2027/uc1.l0052148335">
+    <bf:itemOf rdf:resource="http://www.worldcat.org/oclc/11125184"/>
+    <bf:usageAndAccessPolicy rdf:resource="https://www.hathitrust.org/rights_database#Attributes_pd"/>
+    <dct:accessRights>pd</dct:accessRights>
+    <htrc:digitizationAgent rdf:resource="https://www.hathitrust.org/institution_identifiers#google"/>
+    <htrc:contentProviderAgent rdf:resource="https://www.hathitrust.org/institution_identifiers#UCLA"/>
+    <dct:created>1986-00-00</dct:created>
+    <htrc:rightsReason rdf:resource="https://www.hathitrust.org/rights_database#Reasons_bib"/>
+    <bf:enumerationAndChronology>v.25 no.1 mi.-v.27 no.2 yr.1984-86</bf:enumerationAndChronology>
+  </bf:Item>
+</rdf:RDF>

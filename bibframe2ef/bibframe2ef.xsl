@@ -66,10 +66,12 @@
 				<xsl:call-template name="contribution_agents">
 					<xsl:with-param name="node" select="/rdf:RDF/bf:Work/bf:contribution/bf:Contribution" />
 				</xsl:call-template>
-				<xsl:text>, &#10;		"publisher": {</xsl:text>
-				<xsl:text> &#10;			"type": "Organization"</xsl:text>
-				<xsl:text>, &#10;			"name": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label/text()" /><xsl:text>"</xsl:text>
-				<xsl:text> &#10;		}</xsl:text>
+				<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label">
+					<xsl:text>, &#10;		"publisher": {</xsl:text>
+					<xsl:text> &#10;			"type": "Organization"</xsl:text>
+					<xsl:text>, &#10;			"name": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label/text()" /><xsl:text>"</xsl:text>
+					<xsl:text> &#10;		}</xsl:text>
+				</xsl:if>
 				<xsl:choose>
 					<xsl:when test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about and /rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/rdfs:label">
 						<xsl:text>, &#10;		"pubPlace": [</xsl:text>
@@ -134,6 +136,9 @@
 				<xsl:call-template name="create_identifiers">
 					<xsl:with-param name="subclass" select="'Lccn'" />
 				</xsl:call-template>
+				<xsl:if test="/rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label">
+					<xsl:text>, &#10;		"genre": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label/text()" /><xsl:text>"</xsl:text>
+				</xsl:if>
 				<xsl:text> &#10;	}</xsl:text>
 				<xsl:text>&#10;}</xsl:text>
 		</xsl:result-document>
@@ -159,7 +164,6 @@
 
 	<xsl:template name="create_identifiers">
 		<xsl:param name="subclass" />
-		<xsl:text>, &#10;		"passedValue": "</xsl:text><xsl:value-of select="$subclass"/><xsl:text>"</xsl:text>
 		<xsl:choose>
 			<xsl:when test="$subclass = 'Lcc'">
 				<xsl:if test="/rdf:RDF/bf:Work/bf:classification/bf:ClassificationLcc">
@@ -173,12 +177,12 @@
 				</xsl:if>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:if test="concat(concat('/rdf:RDF/bf:Instance/bf:identifiedBy/bf:',$subclass),'/rdf:value')">
-					<xsl:for-each select="concat('/rdf:RDF/bf:Instance/bf:identifiedBy/bf:',$subclass)">
+				<xsl:if test="/rdf:RDF/bf:Instance/bf:identifiedBy/*[name() = concat('bf:',$subclass)]/rdf:value">
+					<xsl:for-each select="/rdf:RDF/bf:Instance/bf:identifiedBy/*[name() = concat('bf:',$subclass)]">
 						<xsl:text>, &#10;		"identifier": {</xsl:text>
 						<xsl:text> &#10;			"type": "PropertyValue"</xsl:text>
 						<xsl:text>, &#10;			"propertyID": "</xsl:text><xsl:value-of select="lower-case($subclass)" /><xsl:text>"</xsl:text>
-						<xsl:text>, &#10;			"value": "</xsl:text><xsl:value-of select="." /><xsl:text>"</xsl:text>
+						<xsl:text>, &#10;			"value": "</xsl:text><xsl:value-of select="./rdf:value/text()" /><xsl:text>"</xsl:text>
 						<xsl:text> &#10;		}</xsl:text>
 					</xsl:for-each>
 				</xsl:if>

@@ -32,56 +32,40 @@
 	"schemaVersion": "https://wiki.htrc.illinois.edu/display/COM/Extracted+Features+Dataset_2.0", 
 	"sourceInstitution": "htrc", 
 	"about": { 
-		"id": "http://hdl.handle.net/2027/nyp.33433000355994", 
+		"id": "http://hdl.handle.net/2027/uc1.l0052148335", 
 		"type": "Text", 
 		"isAccessibleForFree": "TRUE" 
-		"title": "Rerum Germanicarum scriptores aliquot insignes, qui gesta sub regibus & imperatoribus Teutonicis, iam inde à Carolo M. usque ad Fridericum III. imp. perpetua ferè serie, suis quique seculis, litteris mandata posteritati reliquerunt, tomus primus[-tertius] nunc denuo recognitus, additis scriptoribus aliis antea ineditis. Cum glossario, locis aliorum auctorum parallelis, notis ac indice." 
-		"enumerationChronology": "v. 3", 
-		"author": { 
-			"type": "Person" 
-			"id": "http://www.viaf.org/viaf/49258063" 
-			"name": "Freher, Marquard, 1565-1614." 
-		}, 
+		"title": "Air Force engineering & services quarterly (Tyndall Air Force Base (Fla.) : 1984)" 
+		"enumerationChronology": "v.25 no.1 mi.-v.27 no.2 yr.1984-86", 
 		"contributor": { 
-			"type": "Person" 
-			"id": "http://www.viaf.org/viaf/41920698" 
-			"name": "Struve, Burkhard Gotthelf, 1671-1738." 
+			"type": "Organization" 
+			"id": "http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/009645513271019" 
+			"name": "Air Force Engineering and Services Center (U.S.)" 
 		}, 
 		"publisher": { 
 			"type": "Organization", 
-			"name": "Sumptibus J. R. Dulsseckeri" 
+			"name": "HQ Air Force Engineering and Services CenterSupt. of Docs., U.S. G.P.O." 
 		}, 
 		"pubPlace": [ 
-			"http://id.loc.gov/vocabulary/countries/xx", 
-			"Argentorati" 
+			"http://id.loc.gov/vocabulary/countries/flu", 
+			"Tyndall AFB, Fla.Washington, D.C." 
 		], 
-		"language": "lat", 
+		"language": "eng", 
 		"rightsAttributes": "pd", 
 		"sourceInstitution": { 
-			"name": "NYP", 
+			"name": "UCLA", 
 			"type": "Organization" 
 		}, 
 		"mainEntityOfPage": [ 
-			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/1988560.json", 
-			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/1988560.json", 
-			"https://catalog.hathitrust.org/api/volumes/full/htid/nyp.33433000355994.json" 
+			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/11125184.json", 
+			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/11125184.json", 
+			"https://catalog.hathitrust.org/api/volumes/full/htid/uc1.l0052148335.json" 
 		], 
-		"passedValue": "Lcc", 
-		"identifier": { 
-			"type": "PropertyValue", 
-			"propertyID": "lcc", 
-			"value": "DD3 .F87" 
-		}, 
-		"identifier": { 
-			"type": "PropertyValue", 
-			"propertyID": "lcc", 
-			"value": "DD3 .F87 1717" 
-		}, 
-		"passedValue": "Lccn", 
 		"identifier": { 
 			"type": "PropertyValue", 
 			"propertyID": "lccn", 
-			"value": "/rdf:RDF/bf:Instance/bf:identifiedBy/bf:Lccn" 
-		} 
+			"value": "sn 85009206 " 
+		}, 
+		"genre": "periodical" 
 	}
 }
