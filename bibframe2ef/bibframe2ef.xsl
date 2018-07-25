@@ -13,7 +13,7 @@
 	<xsl:template match='/'>
 <!--		<xsl:variable name="saveAs" select="ef_example.jsonld"/>-->
 
-		<xsl:result-document href="ef_example.jsonld" method='text' exclude-result-prefixes="#all" omit-xml-declaration="yes" indent="no" encoding="UTF-8">
+		<xsl:result-document href="ef_example4.jsonld" method='text' exclude-result-prefixes="#all" omit-xml-declaration="yes" indent="no" encoding="UTF-8">
 				<xsl:text>{ &#10;	"@context": [</xsl:text>
 				<xsl:text> &#10;		"http://schema.org"</xsl:text>
 				<xsl:text>, &#10;		{</xsl:text>
@@ -59,10 +59,7 @@
 						</xsl:otherwise>
 					</xsl:choose>
 				<xsl:text>"</xsl:text>
-				<xsl:text> &#10;		"title": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
-				<xsl:if test="/rdf:RDF/bf:Item/bf:enumerationAndChronology">
-					<xsl:text> &#10;		"enumerationChronology": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Item/bf:enumerationAndChronology/text()" /><xsl:text>"</xsl:text>
-				</xsl:if>
+				<xsl:text>, &#10;		"title": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
 				<xsl:call-template name="contribution_agents">
 					<xsl:with-param name="node" select="/rdf:RDF/bf:Work/bf:contribution/bf:Contribution" />
 				</xsl:call-template>
@@ -138,6 +135,22 @@
 				</xsl:call-template>
 				<xsl:if test="/rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label">
 					<xsl:text>, &#10;		"genre": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label/text()" /><xsl:text>"</xsl:text>
+				</xsl:if>
+				<xsl:if test="/rdf:RDF/bf:Item/bf:enumerationAndChronology">
+					<xsl:text>, &#10;		"enumerationChronology": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Item/bf:enumerationAndChronology/text()" /><xsl:text>"</xsl:text>
+				</xsl:if>
+				<xsl:if test="/rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label and /rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label/text() = 'periodical'">
+					<xsl:text>, &#10;		"isPartOf": {</xsl:text>
+					<xsl:text> &#10;			"title": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
+					<xsl:text>, &#10;			"isPartOf": {</xsl:text>
+					<xsl:text> &#10;				"id": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/@rdf:about" /><xsl:text>"</xsl:text>
+					<xsl:text>, &#10;				"title": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
+					<xsl:text>, &#10;				"type": "Periodical"</xsl:text>
+					<xsl:if test="/rdf:RDF/bf:Instance/bf:identifiedBy/bf:Issn/rdf:value">
+						<xsl:text>, &#10;				"issn": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:identifiedBy/bf:Issn/rdf:value/text()" /><xsl:text>"</xsl:text>
+					</xsl:if>
+					<xsl:text> &#10;			}</xsl:text>
+					<xsl:text> &#10;		}</xsl:text>
 				</xsl:if>
 				<xsl:text> &#10;	}</xsl:text>
 				<xsl:text>&#10;}</xsl:text>

@@ -1,0 +1,85 @@
+{ 
+	"@context": [ 
+		"http://schema.org", 
+		{ 
+			"htrc": "http://wcsa.htrc.illinois.edu/", 
+			"accessProfile": { 
+				"@id": "htrc:accessProfile" 
+			}, 
+			"title": "name", 
+			"enumerationChronology": { 
+				"@id": "htrc:enumerationChronology" 
+			}, 
+			"pubDate": "datePublished", 
+			"pubPlace": "locationCreated", 
+			"language": "inLanguage", 
+			"rightsAttributes": { 
+				"@id": "htrc:accessRights" 
+			}, 
+			"contributor": { 
+				"@id": "schema:contributor", 
+				"@container": "@list" 
+			}, 
+			"sourceInstitution": "provider", 
+			"lastUpdateDate": "dateModified", 
+			"identifier": { 
+				"@id": "schema:identifier", 
+				"@container": "@list" 
+			} 
+		} 
+	], 
+	"type": "Dataset", 
+	"schemaVersion": "https://wiki.htrc.illinois.edu/display/COM/Extracted+Features+Dataset_2.0", 
+	"sourceInstitution": "htrc", 
+	"about": { 
+		"id": "http://hdl.handle.net/2027/nyp.33433000355994", 
+		"type": "Text", 
+		"isAccessibleForFree": "TRUE", 
+		"title": "Rerum Germanicarum scriptores aliquot insignes, qui gesta sub regibus & imperatoribus Teutonicis, iam inde à Carolo M. usque ad Fridericum III. imp. perpetua ferè serie, suis quique seculis, litteris mandata posteritati reliquerunt, tomus primus[-tertius] nunc denuo recognitus, additis scriptoribus aliis antea ineditis. Cum glossario, locis aliorum auctorum parallelis, notis ac indice.", 
+		"author": { 
+			"type": "Person" 
+			"id": "http://www.viaf.org/viaf/49258063" 
+			"name": "Freher, Marquard, 1565-1614." 
+		}, 
+		"contributor": { 
+			"type": "Person" 
+			"id": "http://www.viaf.org/viaf/41920698" 
+			"name": "Struve, Burkhard Gotthelf, 1671-1738." 
+		}, 
+		"publisher": { 
+			"type": "Organization", 
+			"name": "Sumptibus J. R. Dulsseckeri" 
+		}, 
+		"pubPlace": [ 
+			"http://id.loc.gov/vocabulary/countries/xx", 
+			"Argentorati" 
+		], 
+		"language": "lat", 
+		"rightsAttributes": "pd", 
+		"sourceInstitution": { 
+			"name": "NYP", 
+			"type": "Organization" 
+		}, 
+		"mainEntityOfPage": [ 
+			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/1988560.json", 
+			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/1988560.json", 
+			"https://catalog.hathitrust.org/api/volumes/full/htid/nyp.33433000355994.json" 
+		], 
+		"identifier": { 
+			"type": "PropertyValue", 
+			"propertyID": "lcc", 
+			"value": "DD3 .F87" 
+		}, 
+		"identifier": { 
+			"type": "PropertyValue", 
+			"propertyID": "lcc", 
+			"value": "DD3 .F87 1717" 
+		}, 
+		"identifier": { 
+			"type": "PropertyValue", 
+			"propertyID": "lccn", 
+			"value": "48033590    " 
+		}, 
+		"enumerationChronology": "v. 3" 
+	}
+}

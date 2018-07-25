@@ -1,0 +1,80 @@
+{ 
+	"@context": [ 
+		"http://schema.org", 
+		{ 
+			"htrc": "http://wcsa.htrc.illinois.edu/", 
+			"accessProfile": { 
+				"@id": "htrc:accessProfile" 
+			}, 
+			"title": "name", 
+			"enumerationChronology": { 
+				"@id": "htrc:enumerationChronology" 
+			}, 
+			"pubDate": "datePublished", 
+			"pubPlace": "locationCreated", 
+			"language": "inLanguage", 
+			"rightsAttributes": { 
+				"@id": "htrc:accessRights" 
+			}, 
+			"contributor": { 
+				"@id": "schema:contributor", 
+				"@container": "@list" 
+			}, 
+			"sourceInstitution": "provider", 
+			"lastUpdateDate": "dateModified", 
+			"identifier": { 
+				"@id": "schema:identifier", 
+				"@container": "@list" 
+			} 
+		} 
+	], 
+	"type": "Dataset", 
+	"schemaVersion": "https://wiki.htrc.illinois.edu/display/COM/Extracted+Features+Dataset_2.0", 
+	"sourceInstitution": "htrc", 
+	"about": { 
+		"id": "http://hdl.handle.net/2027/uc1.l0052148335", 
+		"type": "Text", 
+		"isAccessibleForFree": "TRUE", 
+		"title": "Air Force engineering & services quarterly (Tyndall Air Force Base (Fla.) : 1984)", 
+		"contributor": { 
+			"type": "Organization" 
+			"id": "http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/009645513271019" 
+			"name": "Air Force Engineering and Services Center (U.S.)" 
+		}, 
+		"publisher": { 
+			"type": "Organization", 
+			"name": "HQ Air Force Engineering and Services CenterSupt. of Docs., U.S. G.P.O." 
+		}, 
+		"pubPlace": [ 
+			"http://id.loc.gov/vocabulary/countries/flu", 
+			"Tyndall AFB, Fla.Washington, D.C." 
+		], 
+		"language": "eng", 
+		"rightsAttributes": "pd", 
+		"sourceInstitution": { 
+			"name": "UCLA", 
+			"type": "Organization" 
+		}, 
+		"mainEntityOfPage": [ 
+			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/11125184.json", 
+			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/11125184.json", 
+			"https://catalog.hathitrust.org/api/volumes/full/htid/uc1.l0052148335.json" 
+		], 
+		"identifier": { 
+			"type": "PropertyValue", 
+			"propertyID": "lccn", 
+			"value": "sn 85009206 " 
+		}, 
+		"genre": "periodical", 
+		"enumerationChronology": "v.25 no.1 mi.-v.27 no.2 yr.1984-86", 
+		"isPartOf": { 
+			"title": "Air Force engineering & services quarterly (Tyndall Air Force Base (Fla.) : 1984)", 
+			"isPartOf": { 
+				"id": "http://www.worldcat.org/oclc/11125184", 
+				"title": "Air Force engineering & services quarterly (Tyndall Air Force Base (Fla.) : 1984)", 
+				"type": "Periodical", 
+				"issn": "0883-0193" 
+			} 
+		} 
+	}
+}
