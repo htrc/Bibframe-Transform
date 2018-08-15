@@ -15,6 +15,7 @@ prefix schema: <http://schema.org/>
 CONSTRUCT {
 	?item	a	schema:PublicationVolume ;
 			schema:name	?title ;
+			htrc:enumerationChronology	?enumChron ;
 			schema:contributor	?Contrib ;
 			schema:publisher	_:vPublisher ;
 			schema:locationCreated	?place ;
@@ -25,6 +26,9 @@ CONSTRUCT {
 			schema:isAccessibleForFree	?isFree ;
 			htrc:typeOfResource	?str_type ;
 			schema:sourceInstitution	_:vSourceInst ;
+			schema:mainEntityOfPage	?full_record ;
+			schema:mainEntityOfPage	?brief_record ;
+			schema:mainEntityOfPage	?htid_record ;
 			schema:issn	?issn ;
 			schema:isbn	?isbn ;
 			schema:identifier	_:vOCLC ;
@@ -64,6 +68,10 @@ WHERE {
 	OPTIONAL {	?item	htrc:contentProviderAgent	?src . 
 						BIND(SUBSTR(STR(?src),52) as ?src_inst)
 	}
+	OPTIONAL {	?item	bf:enumerationAndChronology	?enumChron . }
+	BIND (CONCAT(CONCAT('https://catalog.hathitrust.org/api/volumes/full/recordnumber/',SUBSTR(STR(?Inst),30)),'.json') as ?full_record)
+	BIND (CONCAT(CONCAT('https://catalog.hathitrust.org/api/volumes/brief/recordnumber/',SUBSTR(STR(?Inst),30)),'.json') as ?brief_record)
+	BIND (CONCAT(CONCAT('https://catalog.hathitrust.org/api/volumes/full/htid/',SUBSTR(STR(?item),28)),'.json') as ?htid_record)
 
 	OPTIONAL {	?Inst	bf:issuance	?genre . }
 	OPTIONAL {	?Inst		bf:provisionActivity	?provAct . 
