@@ -1,0 +1,30 @@
+prefix n1: <http://schema.org/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix htrc: <http://wcsa.htrc.illinois.edu/>
+
+CONSTRUCT {
+	?item	a	n1:PublicationVolume ;
+		n1:name	?title ;
+		htrc:enumerationChronology ?enumChron .
+
+		?item	bf:instanceOf	?Work .
+
+		?Work	htrc:contribution	?Contrib .
+		?Contrib	htrc:name	?name .
+}
+WHERE {
+	?item	dcterms:title	?title .
+	?item	bf:itemOf	?Inst .
+
+	?Inst	bf:instanceOf	?Work .
+
+	OPTIONAL {	?Work	bf:contribution/bf:agent	?Contrib .
+				?Contrib	rdfs:label	?name . }
+	OPTIONAL { ?item	bf:enumerationAndChronology	?enumChron . }
+
+	VALUES (?item) {
+		( ?handle_url )
+	}
+}
