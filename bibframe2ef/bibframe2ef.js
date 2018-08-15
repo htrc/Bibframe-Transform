@@ -2,7 +2,7 @@ var fs = require("fs");
 var request = require("request");
 var jsonld = require('jsonld');
 
-var example_handle = 'http://hdl.handle.net/2027/uc1.l0079859914';
+var example_handle = 'http://hdl.handle.net/2027/uc1.l0052148335';
 fs.readFile('./bibframe2ef-V3.rq','utf8', function(err,data) {
 	var test_query = data;
 	test_query = test_query.replace('?handle_url','<' + example_handle + '>');

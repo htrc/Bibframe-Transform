@@ -25,13 +25,24 @@ CONSTRUCT {
 			schema:isAccessibleForFree	?isFree ;
 			htrc:typeOfResource	?str_type ;
 			schema:sourceInstitution	_:vSourceInst ;
-			schema:issn ?oclcNo . 
+			schema:issn	?issn ;
+			schema:isbn	?isbn ;
+			schema:identifier	_:vOCLC ;
+			schema:identifier	_:vLccn . 
 
 	_:vPublisher	schema:name	?publisher ;
 					rdf:type	<http://id.loc.gov/ontologies/bibframe/Organization> .
 
 	_:vSourceInst	schema:name	?src_inst ;
 					rdf:type	<http://id.loc.gov/ontologies/bibframe/Organization> .
+
+	_:vOCLC	a	schema:PropertyValue ;
+			schema:propertyID	"oclc" ;
+			schema:value	?oclcNo .
+
+	_:vLccn	a	schema:PropertyValue ;
+			schema:propertyID	"lccn" ;
+			schema:value	?lccn .
 
 	?place	a	<http://id.loc.gov/ontologies/bibframe/Place> .
 
@@ -53,6 +64,7 @@ WHERE {
 	OPTIONAL {	?item	htrc:contentProviderAgent	?src . 
 						BIND(SUBSTR(STR(?src),52) as ?src_inst)
 	}
+
 	OPTIONAL {	?Inst	bf:issuance	?genre . }
 	OPTIONAL {	?Inst		bf:provisionActivity	?provAct . 
 				?provAct	bf:date	?date .
@@ -66,6 +78,27 @@ WHERE {
 				?provAct3	bf:place	?place .
 							FILTER(!isBlank(?place))
 	}
+	OPTIONAL {	?Inst	bf:identifiedBy	?Issn .
+				?Issn	rdf:value	?issn . 
+				?Issn	a	?issn_class .
+						FILTER( ?issn_class = <http://id.loc.gov/ontologies/bibframe/Issn> )
+	}
+	OPTIONAL {	?Inst	bf:identifiedBy	?Isbn .
+				?Isbn	rdf:value	?isbn . 
+				?Isbn	a	?isbn_class .
+						FILTER( ?isbn_class = <http://id.loc.gov/ontologies/bibframe/Isbn> )
+	}
+	OPTIONAL {	?Inst	bf:identifiedBy	?Lccn .
+				?Lccn	rdf:value	?lccn . 
+				?Lccn	a	?lccn_class .
+						FILTER( ?lccn_class = <http://id.loc.gov/ontologies/bibframe/Lccn> )
+	}
+	OPTIONAL {	?Inst	bf:identifiedBy ?local .
+				?local	rdf:value ?oclcNo ;
+						bf:source/rdfs:label ?so . 
+						filter ( ?so = "OCoLC" ) 
+	}
+
 	OPTIONAL {	?Work	bf:language	?lang . 
 						BIND(SUBSTR(STR(?lang),40) as ?str_lang)
 	}
@@ -73,17 +106,10 @@ WHERE {
 						filter ( ?type != <http://id.loc.gov/ontologies/bibframe/Work> )
 						BIND(STR(?type) as ?str_type)
 	}
-
 	OPTIONAL {	?Work	bf:contribution/bf:agent	?Contrib .
 				?Contrib	rdfs:label	?Name ;
 							rdf:type	?ContribType . 
 							filter (?ContribType NOT IN (bf:Agent) ) 
-	}
-
-	OPTIONAL {	?Inst	bf:identifiedBy ?local .
-				?local	rdf:value ?oclcNo ;
-						bf:source/rdfs:label ?so . 
-						filter ( ?so = "OCoLC" ) 
 	}
 
 	VALUES (?item) {
