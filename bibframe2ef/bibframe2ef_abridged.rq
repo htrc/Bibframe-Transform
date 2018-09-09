@@ -17,7 +17,6 @@ CONSTRUCT {
 			htrc:volume_name	?title ;
 			htrc:enumerationChronology	?enumChron ;
 			schema:contributor	?Contrib ;
-			schema:publisher	?publisher ;
 			schema:datePublished	?int_date ;
 			schema:genre	?genre ;
 			schema:inLanguage	?str_lang ;
@@ -42,9 +41,6 @@ CONSTRUCT {
 
 	?part_of	htrc:volume_name ?work_title ;
 				rdf:type	<http://schema.org/CreativeWorkSeries> .
-
-	?publisher	a	<http://id.loc.gov/ontologies/bibframe/Organization> ;
-				schema:name	?pubName .
 
 	?src	a	<http://id.loc.gov/ontologies/bibframe/Organization> ;
 			schema:name ?src_inst .
@@ -118,9 +114,6 @@ WHERE {
 	OPTIONAL {	?Inst	bf:issuance	?oclc_node . 
 						FILTER(SUBSTR(STR(?Inst),1,1) != "_")
 						BIND(SUBSTR(STR(?Inst),30) as ?oclcNo)
-	}
-	OPTIONAL {	?Inst		bf:provisionActivity/bf:agent	?publisher .
-				?publisher 	rdfs:label	?pubName .
 	}
 
 	OPTIONAL {	?Work	rdfs:label	?work_title . }

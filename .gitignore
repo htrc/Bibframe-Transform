@@ -25,3 +25,10 @@ viaf_index*
 /old_trimmed_all_volumes_json*
 /to_be_redone*
 /test_diacritics*
+/bibframe2ef/bibframe2ef-V4.rq
+/bibframe2ef/ef_context_2.jsonld
+/bibframe2ef/ef_context_3.jsonld
+/bibframe2ef/ef_context_4.jsonld
+/bibframe2ef/fixDates.py
+/bibframe2ef/fixSolr.js
+/bibframe2ef/fixSolr.py
