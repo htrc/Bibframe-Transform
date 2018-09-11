@@ -19,6 +19,7 @@ CONSTRUCT {
 			schema:contributor	?Contrib ;
 			schema:publisher	?publisher ;
 			schema:datePublished	?int_date ;
+			schema:locationCreated	?place ;
 			schema:genre	?genre ;
 			schema:inLanguage	?str_lang ;
 			schema:inLanguage	?node_str_lang ;
@@ -119,8 +120,11 @@ WHERE {
 						FILTER(SUBSTR(STR(?Inst),1,1) != "_")
 						BIND(SUBSTR(STR(?Inst),30) as ?oclcNo)
 	}
-	OPTIONAL {	?Inst		bf:provisionActivity/bf:agent	?publisher .
+	OPTIONAL {	?Inst		bf:provisionActivity	?provAct .
+				?provAct 	bf:agent	?publisher .
 				?publisher 	rdfs:label	?pubName .
+				?provAct	bf:place	?place .
+				FILTER(!ISBLANK(?place))
 	}
 
 	OPTIONAL {	?Work	rdfs:label	?work_title . }

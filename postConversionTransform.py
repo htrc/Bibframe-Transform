@@ -26,29 +26,33 @@ def convertFillerURI(filler_uri,mode=None):
 	else:
 		prefix = '_:b'
 	logging.debug(filler_uri)
-	base = filler_uri[filler_uri.rfind('/')+1:filler_uri.rfind('#')]
-	end_string = filler_uri[filler_uri.rfind('#')+1:]
-	if '-' in end_string:
-		dash_index = end_string.rfind('-')
-		end_string = end_string[:dash_index] + end_string[dash_index+1:]
-
-	match = re.match(r"([a-zA-Z]+)([0-9]*)",end_string)
-	if match:
-		items = match.groups()
-		if items[0] == 'Work':
-			text_conversion = '0'
-		elif items[0] == 'Instance':
-			text_conversion = '1'
-		elif items[0] == 'Agent':
-			text_conversion = '2'
-		elif items[0] == 'GenreForm':
-			text_conversion = '3'
-		else:
-			text_conversion = '4'
-
-		return prefix + base + text_conversion + items[1]
+	if filler_uri.rfind('#') == -1:
+		base = filler_uri[filler_uri.rfind('/')+1:]
+		return prefix + base + '0'
 	else:
-		return prefix + base
+		base = filler_uri[filler_uri.rfind('/')+1:filler_uri.rfind('#')]
+		end_string = filler_uri[filler_uri.rfind('#')+1:]
+		if '-' in end_string:
+			dash_index = end_string.rfind('-')
+			end_string = end_string[:dash_index] + end_string[dash_index+1:]
+
+		match = re.match(r"([a-zA-Z]+)([0-9]*)",end_string)
+		if match:
+			items = match.groups()
+			if items[0] == 'Work':
+				text_conversion = '0'
+			elif items[0] == 'Instance':
+				text_conversion = '1'
+			elif items[0] == 'Agent':
+				text_conversion = '2'
+			elif items[0] == 'GenreForm':
+				text_conversion = '3'
+			else:
+				text_conversion = '4'
+
+			return prefix + base + text_conversion + items[1]
+		else:
+			return prefix + base
 
 def createBlankNode(agent,mode=None):
 	try:
@@ -546,6 +550,7 @@ def setContributionAgent(agent,countries,cursor,connection,timesheet):
 			logging.debug(match_key)
 			if len(match_key) > 200:
 				match_key = shortenMatchKey(agent,match_key,match_key_type,'bflc','http://id.loc.gov/ontologies/bflc/')
+			match_key = normalize('NFC',match_key.decode('utf-8'))
 
 			if match_key in countries:
 				agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',countries[match_key])
@@ -593,7 +598,7 @@ def setContributionAgent(agent,countries,cursor,connection,timesheet):
 					elif found_authorized_count > 1:
 						new_uri = createBlankNode(agent,'person')
 						add_name = u'INSERT INTO found_names (label, url, type) VALUES (%s, %s, %s)'
-						name_data = (normalize('NFC',match_key.decode('utf-8')),new_uri,agent_type)
+						name_data = (match_key,new_uri,agent_type)
 
 						timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_name,name_data)
 						timeSQLCall(timesheet,timesheet_domain,connection.commit)
@@ -618,7 +623,7 @@ def setContributionAgent(agent,countries,cursor,connection,timesheet):
 								while i < len(results_dict['result']) and match_not_found:
 									logging.debug(results_dict['result'][i]['term'] == match_key.decode('utf-8'))
 									logging.debug(results_dict['result'][i]['term'])
-									logging.debug(match_key.decode('utf-8'))
+									logging.debug(match_key)
 									logging.debug(sanitizeMatchString(normalize('NFC',results_dict['result'][i]['term'])) == normalize('NFC',match_key.decode('utf-8')))
 									if results_dict['result'][i]['nametype'] == agent_type and sanitizeMatchString(normalize('NFC',results_dict['result'][i]['term'])) == normalize('NFC',match_key.decode('utf-8')) and 'viafid' in results_dict['result'][i]:
 										logging.debug("Found " + match_key)
@@ -629,7 +634,7 @@ def setContributionAgent(agent,countries,cursor,connection,timesheet):
 										logging.debug(agent_type)
 
 										add_name = u'INSERT INTO found_names (label, url, type) VALUES (%s, %s, %s)'
-										name_data = (normalize('NFC',match_key.decode('utf-8')),agent_uri,agent_type)
+										name_data = (match_key,agent_uri,agent_type)
 
 										timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_name,name_data)
 										timeSQLCall(timesheet,timesheet_domain,connection.commit)
@@ -645,7 +650,8 @@ def setContributionAgent(agent,countries,cursor,connection,timesheet):
 							new_uri = createBlankNode(agent,'person')
 							add_name = u'INSERT INTO found_names (label, url, type) VALUES (%s, %s, %s)'
 							logging.debug(match_key)
-							name_data = (normalize('NFC',match_key.decode('utf-8')),new_uri,agent_type)
+							name_data = (match_key,new_uri,agent_type)
+							logging.debug(name_data)
 
 							timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_name,name_data)
 							timeSQLCall(timesheet,timesheet_domain,connection.commit)
@@ -682,7 +688,7 @@ def getWorldCatData(root,works,work_ids,timesheet):
 
 		for instance_url in instance_urls:
 			try:
-				logging.debug("Already fond work " + work_ids[instance_url])
+				logging.debug("Already found work " + work_ids[instance_url])
 			except:
 				if 'worldcat.org' in instance_url:
 					result = getRequest(instance_url + '.jsonld',True,timesheet)

@@ -1,0 +1,50 @@
+Solr Indexing
+
+Required Fields:
+id
+title
+provider (string)
+datePublished [must be a date]
+
+Optional Fields
+yearPublished
+alternateTitle*
+contributor*
+genre* (string)
+inLanguage*
+issn* (string)
+isbn* (string)
+lccn
+doi
+oclc
+identifier*
+publisher*
+isAccessibleForFree
+rightsAttributes
+accessProfile (string)
+sourceOrganization
+type (string)
+typeOfResource (string)
+journalTitle
+
+volumeNumber
+issueNumber
+pageStart
+pageEnd
+pagination
+pageCount
+*=MultiValued
+
+Fields In collector (for keyword search):
+contributor
+journalTitle
+provider
+publisher
+sourceOrganization
+title
+
+Derived Fields (All fields endng in _str can be used for faceting):
+publisher_str
+journalTitle_str
+contributor_str
+sourceOrganization_str

@@ -73,10 +73,6 @@ function buildSolrJSON(handle,revised) {
 		solr_json['rightsAttributes'] = revised['metadata']['rightsAttributes'];
 	}
 
-	if ('language' in revised['metadata']) {
-		solr_json['language'] = revised['metadata']['language'];
-	}
-
 	if ('pubDate' in revised['metadata']) {
 		solr_json['datePublished'] = revised['metadata']['pubDate'].toString() + '-12-31';
 	}
@@ -91,6 +87,19 @@ function buildSolrJSON(handle,revised) {
 		}
 		else {
 			solr_json['publisher'] = revised['metadata']['publisher']['name'];
+		}
+	}
+
+	if ('language' in revised['metadata']) {
+		var language = []
+		if (revised['metadata']['language'] instanceof Array) {
+			for (var n = 0; n < revised['metadata']['language'].length; n++) {
+				language.push(revised['metadata']['language'][n]);
+			}
+			solr_json['inLanguage'] = language;
+		}
+		else {
+			solr_json['inLanguage'] = revised['metadata']['language'];
 		}
 	}
 
@@ -440,7 +449,7 @@ function processHandleList(handles,results) {
 	async.mapLimit(handles,5,createEF,onComplete)
 }
 
-var read_file = '../../../biology_workset.csv';
+var read_file = 'biology_workset.csv';
 //var read_file = './sample1.csv';
 
 fs.readFile(read_file,'utf8',function(err,data) {
