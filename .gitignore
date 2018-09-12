@@ -32,5 +32,6 @@ viaf_index*
 /bibframe2ef/fixDates.py
 /bibframe2ef/fixSolr.js
 /bibframe2ef/fixSolr.py
+/bibframe2ef/checkIngested.py
 /bibframe2ef/node_modules*
 /ic_az*

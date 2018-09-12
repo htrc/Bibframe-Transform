@@ -18,14 +18,14 @@ function buildSolrJSON(handle,revised) {
 					creators.push(revised['metadata']['contributor'][i]['name']);
 				}
 			}
-			solr_json['creator'] = creators;
+			solr_json['contributor'] = creators;
 		}
 		else {
 			if (revised['metadata']['contributor']['name'] instanceof Array) {
-				solr_json['creator'] = revised['metadata']['contributor']['name'][0];
+				solr_json['contributor'] = revised['metadata']['contributor']['name'][0];
 			}
 			else {
-				solr_json['creator'] = revised['metadata']['contributor']['name'];
+				solr_json['contributor'] = revised['metadata']['contributor']['name'];
 			}
 		}
 	}
@@ -57,7 +57,16 @@ function buildSolrJSON(handle,revised) {
 	}
 
 	if ('rightsAttributes' in revised['metadata']) {
-		solr_json['rightsAttributes'] = revised['metadata']['rightsAttributes'];
+		if (revised['metadata']['rightsAttributes'] instanceof Array) {
+			for (var n = 0; n < revised['metadata']['rightsAttributes'].length; n++) {
+				if (revised['metadata']['rightsAttributes'][n] == 'pd' || revised['metadata']['rightsAttributes'][n] == 'ic' || revised['metadata']['rightsAttributes'][n] == 'und') {
+					solr_json['rightsAttributes'] = revised['metadata']['rightsAttributes'][n];
+				}
+			}
+		}
+		else {
+			solr_json['rightsAttributes'] = revised['metadata']['rightsAttributes'];
+		}
 	}
 
 	if ('pubDate' in revised['metadata']) {
@@ -69,10 +78,15 @@ function buildSolrJSON(handle,revised) {
 	}
 
 	if ('publisher' in revised['metadata']) {
-		var publisher = []
 		if (revised['metadata']['publisher'] instanceof Array) {
+			var publisher = [];
 			for (var n = 0; n < revised['metadata']['publisher'].length; n++) {
-				publisher.push(revised['metadata']['publisher'][n]['name']);
+				if (revised['metadata']['publisher'][n]['name'] instanceof Object) {
+					publisher.push(revised['metadata']['publisher'][n]['name']['@value']);
+				}
+				else {
+					publisher.push(revised['metadata']['publisher'][n]['name']);
+				}
 			}
 			solr_json['publisher'] = publisher;
 		}
@@ -82,8 +96,8 @@ function buildSolrJSON(handle,revised) {
 	}
 
 	if ('language' in revised['metadata']) {
-		var language = []
 		if (revised['metadata']['language'] instanceof Array) {
+			var language = [];
 			for (var n = 0; n < revised['metadata']['language'].length; n++) {
 				language.push(revised['metadata']['language'][n]);
 			}
