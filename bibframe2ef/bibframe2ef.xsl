@@ -13,8 +13,8 @@
 	<xsl:template match='/'>
 <!--		<xsl:variable name="saveAs" select="ef_example.jsonld"/>-->
 
-		<xsl:result-document href="ef_example4.jsonld" method='text' exclude-result-prefixes="#all" omit-xml-declaration="yes" indent="no" encoding="UTF-8">
-				<xsl:text>{ &#10;	"@context": [</xsl:text>
+		<xsl:result-document href="ef_example2.jsonld" method='text' exclude-result-prefixes="#all" omit-xml-declaration="yes" indent="no" encoding="UTF-8">
+<!--				<xsl:text>{ &#10;	"@context": [</xsl:text>
 				<xsl:text> &#10;		"http://schema.org"</xsl:text>
 				<xsl:text>, &#10;		{</xsl:text>
 				<xsl:text> &#10;			"htrc": "http://wcsa.htrc.illinois.edu/"</xsl:text>
@@ -45,27 +45,41 @@
 				<xsl:text> &#10;	]</xsl:text>
 				<xsl:text>, &#10;	"type": "Dataset"</xsl:text>
 				<xsl:text>, &#10;	"schemaVersion": "https://wiki.htrc.illinois.edu/display/COM/Extracted+Features+Dataset_2.0"</xsl:text>
-				<xsl:text>, &#10;	"sourceInstitution": "htrc"</xsl:text>
-				<xsl:text>, &#10;	"about": {</xsl:text>
+				<xsl:text>, &#10;	"sourceInstitution": "htrc"</xsl:text>-->
+				<xsl:text>, &#10;	"metadata": {</xsl:text>
 				<xsl:text> &#10;		"id": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Item/@rdf:about" /><xsl:text>"</xsl:text>
-				<xsl:text>, &#10;		"type": "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Work/rdf:type/@rdf:resource,39)" /><xsl:text>"</xsl:text>
-				<xsl:text>, &#10;		"isAccessibleForFree": "</xsl:text>
+				<xsl:choose>
+					<xsl:when test="substring(/rdf:RDF/bf:Instance/bf:issuance/bf:Issuance/@rdf:about,39) = 'mono'">
+						<xsl:text>, &#10;		"type": "Book"</xsl:text>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:choose>
+							<xsl:when test="substring(/rdf:RDF/bf:Instance/bf:issuance/bf:Issuance/@rdf:about,39) = 'serl'">
+								<xsl:text>, &#10;		"type": "PublicationVolume"</xsl:text>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:text>, &#10;		"type": "CreativeWork"</xsl:text>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:otherwise>
+				</xsl:choose>
+<!--				<xsl:text>, &#10;		"type": "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Instance/bf:issuance/bf:Issuance/@rdf:about,39)" /><xsl:text>"</xsl:text>-->
+				<xsl:text>, &#10;		"isAccessibleForFree": </xsl:text>
 					<xsl:choose>
 						<xsl:when test="/rdf:RDF/bf:Item/dct:accessRights/text() = 'pd'">
-							<xsl:text>TRUE</xsl:text>
+							<xsl:text>true</xsl:text>
 						</xsl:when>
 						<xsl:otherwise>
-							<xsl:text>FALSE</xsl:text>
+							<xsl:text>false</xsl:text>
 						</xsl:otherwise>
 					</xsl:choose>
-				<xsl:text>"</xsl:text>
 				<xsl:text>, &#10;		"title": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
 				<xsl:call-template name="contribution_agents">
 					<xsl:with-param name="node" select="/rdf:RDF/bf:Work/bf:contribution/bf:Contribution" />
 				</xsl:call-template>
 				<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label">
 					<xsl:text>, &#10;		"publisher": {</xsl:text>
-					<xsl:text> &#10;			"type": "Organization"</xsl:text>
+					<xsl:text> &#10;			"type": "http://id.loc.gov/ontologies/bibframe/Organization"</xsl:text>
 					<xsl:text>, &#10;			"name": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label/text()" /><xsl:text>"</xsl:text>
 					<xsl:text> &#10;		}</xsl:text>
 				</xsl:if>
@@ -140,8 +154,31 @@
 					<xsl:text>, &#10;		"enumerationChronology": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Item/bf:enumerationAndChronology/text()" /><xsl:text>"</xsl:text>
 				</xsl:if>
 				<xsl:if test="/rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label and /rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label/text() = 'periodical'">
+					<xsl:if test="matches(/rdf:RDF/bf:Item/bf:enumerationAndChronology/text(),'no.')">
+						<xsl:text>, &#10;		"issueNumber": "</xsl:text>
+						<xsl:choose>
+							<xsl:when test="matches(/rdf:RDF/bf:Item/bf:enumerationAndChronology/text(),'-[: ]?v.')">
+								<xsl:text>no.</xsl:text><xsl:value-of select="tokenize(tokenize(/rdf:RDF/bf:Item/bf:enumerationAndChronology/text(),'-[: ]?v.')[1],'no.')[2]" /><xsl:text>-</xsl:text><xsl:text>no.</xsl:text><xsl:value-of select="tokenize(tokenize(/rdf:RDF/bf:Item/bf:enumerationAndChronology/text(),'-[: ]?v.')[last()],'no.')[2]" />
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:text>no.</xsl:text><xsl:value-of select="tokenize(/rdf:RDF/bf:Item/bf:enumerationAndChronology/text(),'no.')[2]" />
+							</xsl:otherwise>
+						</xsl:choose>
+						<xsl:text>"</xsl:text>
+					</xsl:if>
 					<xsl:text>, &#10;		"isPartOf": {</xsl:text>
 					<xsl:text> &#10;			"title": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
+					<xsl:if test="/rdf:RDF/bf:Item/bf:enumerationAndChronology">
+						<xsl:text> &#10;			"enumerationChronology": "</xsl:text>
+						<xsl:choose>
+							<xsl:when test="matches(/rdf:RDF/bf:Item/bf:enumerationAndChronology/text(),'-[: ]?v.')">
+								<xsl:value-of select="normalize-space(tokenize(tokenize(/rdf:RDF/bf:Item/bf:enumerationAndChronology/text(),'-[: ]?v.')[1],'no.')[1])" /><xsl:text>-</xsl:text><xsl:text>v.</xsl:text><xsl:value-of select="normalize-space(tokenize(tokenize(/rdf:RDF/bf:Item/bf:enumerationAndChronology/text(),'-[: ]?v.')[last()],'no.')[1])" />
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:value-of select="tokenize(/rdf:RDF/bf:Item/bf:enumerationAndChronology/text(),'no.')[1]" />
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:if>
 					<xsl:text>, &#10;			"isPartOf": {</xsl:text>
 					<xsl:text> &#10;				"id": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/@rdf:about" /><xsl:text>"</xsl:text>
 					<xsl:text>, &#10;				"title": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
@@ -160,15 +197,8 @@
 	<xsl:template name="contribution_agents"><!-- match="/rdf:RDF/bf:Work/bf:contribution/bf:Contribution/">-->
 		<xsl:param name="node" />
 		<xsl:for-each select="$node">
-			<xsl:choose>
-				<xsl:when test="rdf:type/@rdf:resource = 'http://id.loc.gov/ontologies/bflc/PrimaryContribution'">
-					<xsl:text>, &#10;		"author": {</xsl:text>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:text>, &#10;		"contributor": {</xsl:text>
-				</xsl:otherwise>
-			</xsl:choose>
-			<xsl:text> &#10;			"type": "</xsl:text><xsl:value-of select="substring(bf:agent/bf:Agent/rdf:type/@rdf:resource,39)" /><xsl:text>"</xsl:text>
+			<xsl:text>, &#10;		"contributor": {</xsl:text>
+			<xsl:text> &#10;			"type": "</xsl:text><xsl:value-of select="bf:agent/bf:Agent/rdf:type/@rdf:resource" /><xsl:text>"</xsl:text>
 			<xsl:text> &#10;			"id": "</xsl:text><xsl:value-of select="bf:agent/bf:Agent/@rdf:about" /><xsl:text>"</xsl:text>
 			<xsl:text> &#10;			"name": "</xsl:text><xsl:value-of select="bf:agent/bf:Agent/rdfs:label/text()" /><xsl:text>"</xsl:text>
 			<xsl:text> &#10;		}</xsl:text>

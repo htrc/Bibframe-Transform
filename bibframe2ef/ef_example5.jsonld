@@ -1,0 +1,75 @@
+{ 
+	"@context": [ 
+		"http://schema.org", 
+		{ 
+			"htrc": "http://wcsa.htrc.illinois.edu/", 
+			"accessProfile": { 
+				"@id": "htrc:accessProfile" 
+			}, 
+			"title": "name", 
+			"enumerationChronology": { 
+				"@id": "htrc:enumerationChronology" 
+			}, 
+			"pubDate": "datePublished", 
+			"pubPlace": "locationCreated", 
+			"language": "inLanguage", 
+			"rightsAttributes": { 
+				"@id": "htrc:accessRights" 
+			}, 
+			"contributor": { 
+				"@id": "schema:contributor", 
+				"@container": "@list" 
+			}, 
+			"sourceInstitution": "provider", 
+			"lastUpdateDate": "dateModified", 
+			"identifier": { 
+				"@id": "schema:identifier", 
+				"@container": "@list" 
+			} 
+		} 
+	], 
+	"type": "Dataset", 
+	"schemaVersion": "https://wiki.htrc.illinois.edu/display/COM/Extracted+Features+Dataset_2.0", 
+	"sourceInstitution": "htrc", 
+	"about": { 
+		"id": "http://hdl.handle.net/2027/uc1.c3064491", 
+		"type": "Text", 
+		"isAccessibleForFree": "FALSE", 
+		"title": "Etoile d'Orient (Paris, France)", 
+		"contributor": { 
+			"type": "Organization" 
+			"id": "http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/012336214271025" 
+			"name": "Centre esotérique oriental de France." 
+		}, 
+		"publisher": { 
+			"type": "Organization", 
+			"name": "Centre esotérique oriental de France" 
+		}, 
+		"pubPlace": [ 
+			"http://id.loc.gov/vocabulary/countries/fr", 
+			"Paris" 
+		], 
+		"language": "fre", 
+		"rightsAttributes": "pdus", 
+		"sourceInstitution": { 
+			"name": "NRLF", 
+			"type": "Organization" 
+		}, 
+		"mainEntityOfPage": [ 
+			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/214922878.json", 
+			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/214922878.json", 
+			"https://catalog.hathitrust.org/api/volumes/full/htid/uc1.c3064491.json" 
+		], 
+		"genre": "periodical", 
+		"enumerationChronology": "v.1 (1908)", 
+		"isPartOf": { 
+			"title": "Etoile d'Orient (Paris, France)" 
+			"enumerationChronology": "v.1 (1908), 
+			"isPartOf": { 
+				"id": "http://www.worldcat.org/oclc/214922878", 
+				"title": "Etoile d'Orient (Paris, France)", 
+				"type": "Periodical" 
+			} 
+		} 
+	}
+}

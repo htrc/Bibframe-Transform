@@ -1,53 +1,21 @@
-{ 
-	"@context": [ 
-		"http://schema.org", 
-		{ 
-			"htrc": "http://wcsa.htrc.illinois.edu/", 
-			"accessProfile": { 
-				"@id": "htrc:accessProfile" 
-			}, 
-			"title": "name", 
-			"enumerationChronology": { 
-				"@id": "htrc:enumerationChronology" 
-			}, 
-			"pubDate": "datePublished", 
-			"pubPlace": "locationCreated", 
-			"language": "inLanguage", 
-			"rightsAttributes": { 
-				"@id": "htrc:accessRights" 
-			}, 
-			"contributor": { 
-				"@id": "schema:contributor", 
-				"@container": "@list" 
-			}, 
-			"sourceInstitution": "provider", 
-			"lastUpdateDate": "dateModified", 
-			"identifier": { 
-				"@id": "schema:identifier", 
-				"@container": "@list" 
-			} 
-		} 
-	], 
-	"type": "Dataset", 
-	"schemaVersion": "https://wiki.htrc.illinois.edu/display/COM/Extracted+Features+Dataset_2.0", 
-	"sourceInstitution": "htrc", 
-	"about": { 
+, 
+	"metadata": { 
 		"id": "http://hdl.handle.net/2027/nyp.33433000355994", 
-		"type": "Text", 
-		"isAccessibleForFree": "TRUE", 
+		"type": "Book", 
+		"isAccessibleForFree": true, 
 		"title": "Rerum Germanicarum scriptores aliquot insignes, qui gesta sub regibus & imperatoribus Teutonicis, iam inde à Carolo M. usque ad Fridericum III. imp. perpetua ferè serie, suis quique seculis, litteris mandata posteritati reliquerunt, tomus primus[-tertius] nunc denuo recognitus, additis scriptoribus aliis antea ineditis. Cum glossario, locis aliorum auctorum parallelis, notis ac indice.", 
-		"author": { 
-			"type": "Person" 
+		"contributor": { 
+			"type": "http://id.loc.gov/ontologies/bibframe/Person" 
 			"id": "http://www.viaf.org/viaf/49258063" 
 			"name": "Freher, Marquard, 1565-1614." 
 		}, 
 		"contributor": { 
-			"type": "Person" 
+			"type": "http://id.loc.gov/ontologies/bibframe/Person" 
 			"id": "http://www.viaf.org/viaf/41920698" 
 			"name": "Struve, Burkhard Gotthelf, 1671-1738." 
 		}, 
 		"publisher": { 
-			"type": "Organization", 
+			"type": "http://id.loc.gov/ontologies/bibframe/Organization", 
 			"name": "Sumptibus J. R. Dulsseckeri" 
 		}, 
 		"pubPlace": [ 
