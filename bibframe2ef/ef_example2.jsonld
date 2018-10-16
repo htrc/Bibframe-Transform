@@ -1,49 +1,13 @@
 , 
 	"metadata": { 
-		"id": "http://hdl.handle.net/2027/uc1.c3064491", 
-		"type": "PublicationVolume", 
+		"id": "", 
+		"type": "CreativeWork", 
 		"isAccessibleForFree": false, 
-		"title": "Etoile d'Orient (Paris, France)", 
-		"contributor": { 
-			"type": "http://id.loc.gov/ontologies/bibframe/Organization", 
-			"id": "http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/012336214271025", 
-			"name": "Centre esotérique oriental de France." 
-		}, 
-		"pubDate": 1908, 
-		"publisher": { 
-			"type": "http://id.loc.gov/ontologies/bibframe/Organization", 
-			"name": "Centre esotérique oriental de France" 
-		}, 
-		"pubPlace": [ 
-			"http://id.loc.gov/vocabulary/countries/fr", 
-			"Paris" 
-		], 
-		"inLanguage": "fre", 
-		"rightsAttributes": "pdus", 
-		"sourceInstitution": { 
-			"name": "NRLF", 
-			"type": "Organization" 
-		}, 
+		"title": "", 
 		"mainEntityOfPage": [ 
-			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/214922878.json", 
-			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/214922878.json", 
-			"https://catalog.hathitrust.org/api/volumes/full/htid/uc1.c3064491.json" 
-		], 
-		"identifier": { 
-			"type": "PropertyValue", 
-			"propertyID": "oclc", 
-			"value": "214922878" 
-		}, 
-		"genre": "http://id.loc.gov/vocabulary/marcgt/doc", 
-		"enumerationChronology": "v.1 (1908)", 
-		"isPartOf": { 
-			"title": "Etoile d'Orient (Paris, France)" 
-			"enumerationChronology": "v.1 (1908), 
-			"isPartOf": { 
-				"id": "http://www.worldcat.org/oclc/214922878", 
-				"title": "Etoile d'Orient (Paris, France)", 
-				"type": "Periodical" 
-			} 
-		} 
+			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/.json", 
+			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/.json", 
+			"https://catalog.hathitrust.org/api/volumes/full/htid/.json" 
+		] 
 	}
 }

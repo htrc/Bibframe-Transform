@@ -89,6 +89,7 @@
 				<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about">
 					
 				</xsl:if>
+				<xsl:call-template name="pub_place" />
 				<xsl:choose>
 					<xsl:when test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about and /rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/rdfs:label">
 						<xsl:text>, &#10;		"pubPlace": [</xsl:text>
@@ -254,6 +255,28 @@
 			<xsl:text> &#10;			"name": "</xsl:text><xsl:value-of select="bf:agent/bf:Agent/rdfs:label/text()" /><xsl:text>"</xsl:text>
 			<xsl:text> &#10;		}</xsl:text>
 		</xsl:for-each>-->
+	</xsl:template>
+
+	<xsl:template name="pub_place">
+		<xsl:variable name="pub_places" select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about" />
+		<xsl:choose>
+			<xsl:when test="count($pub_places) > 1" >
+				<xsl:text>, &#10;		"pubPlace": [</xsl:text>
+				<xsl:for-each select="$pub_places">
+					<xsl:if test="position() != 1">
+						<xsl:text>,</xsl:text>
+					</xsl:if>
+					<xsl:text> &#10;			{</xsl:text>
+					<xsl:text> &#10;				"id": "</xsl:text><xsl:value-of select="." /><xsl:text>"</xsl:text>
+					<xsl:text>, &#10;				"type": "http://id.loc.gov/ontologies/bibframe/Place"</xsl:text>
+					<xsl:text> &#10;			}</xsl:text>
+				</xsl:for-each>
+				<xsl:text> &#10;		]</xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template name="languages">
