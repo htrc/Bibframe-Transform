@@ -1,53 +1,49 @@
 , 
 	"metadata": { 
-		"id": "http://hdl.handle.net/2027/nyp.33433000355994", 
-		"type": "Book", 
-		"isAccessibleForFree": true, 
-		"title": "Rerum Germanicarum scriptores aliquot insignes, qui gesta sub regibus & imperatoribus Teutonicis, iam inde à Carolo M. usque ad Fridericum III. imp. perpetua ferè serie, suis quique seculis, litteris mandata posteritati reliquerunt, tomus primus[-tertius] nunc denuo recognitus, additis scriptoribus aliis antea ineditis. Cum glossario, locis aliorum auctorum parallelis, notis ac indice.", 
+		"id": "http://hdl.handle.net/2027/uc1.c3064491", 
+		"type": "PublicationVolume", 
+		"isAccessibleForFree": false, 
+		"title": "Etoile d'Orient (Paris, France)", 
 		"contributor": { 
-			"type": "http://id.loc.gov/ontologies/bibframe/Person" 
-			"id": "http://www.viaf.org/viaf/49258063" 
-			"name": "Freher, Marquard, 1565-1614." 
+			"type": "http://id.loc.gov/ontologies/bibframe/Organization", 
+			"id": "http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/012336214271025", 
+			"name": "Centre esotérique oriental de France." 
 		}, 
-		"contributor": { 
-			"type": "http://id.loc.gov/ontologies/bibframe/Person" 
-			"id": "http://www.viaf.org/viaf/41920698" 
-			"name": "Struve, Burkhard Gotthelf, 1671-1738." 
-		}, 
+		"pubDate": 1908, 
 		"publisher": { 
 			"type": "http://id.loc.gov/ontologies/bibframe/Organization", 
-			"name": "Sumptibus J. R. Dulsseckeri" 
+			"name": "Centre esotérique oriental de France" 
 		}, 
 		"pubPlace": [ 
-			"http://id.loc.gov/vocabulary/countries/xx", 
-			"Argentorati" 
+			"http://id.loc.gov/vocabulary/countries/fr", 
+			"Paris" 
 		], 
-		"language": "lat", 
-		"rightsAttributes": "pd", 
+		"inLanguage": "fre", 
+		"rightsAttributes": "pdus", 
 		"sourceInstitution": { 
-			"name": "NYP", 
+			"name": "NRLF", 
 			"type": "Organization" 
 		}, 
 		"mainEntityOfPage": [ 
-			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/1988560.json", 
-			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/1988560.json", 
-			"https://catalog.hathitrust.org/api/volumes/full/htid/nyp.33433000355994.json" 
+			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/214922878.json", 
+			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/214922878.json", 
+			"https://catalog.hathitrust.org/api/volumes/full/htid/uc1.c3064491.json" 
 		], 
 		"identifier": { 
 			"type": "PropertyValue", 
-			"propertyID": "lcc", 
-			"value": "DD3 .F87" 
+			"propertyID": "oclc", 
+			"value": "214922878" 
 		}, 
-		"identifier": { 
-			"type": "PropertyValue", 
-			"propertyID": "lcc", 
-			"value": "DD3 .F87 1717" 
-		}, 
-		"identifier": { 
-			"type": "PropertyValue", 
-			"propertyID": "lccn", 
-			"value": "48033590    " 
-		}, 
-		"enumerationChronology": "v. 3" 
+		"genre": "http://id.loc.gov/vocabulary/marcgt/doc", 
+		"enumerationChronology": "v.1 (1908)", 
+		"isPartOf": { 
+			"title": "Etoile d'Orient (Paris, France)" 
+			"enumerationChronology": "v.1 (1908), 
+			"isPartOf": { 
+				"id": "http://www.worldcat.org/oclc/214922878", 
+				"title": "Etoile d'Orient (Paris, France)", 
+				"type": "Periodical" 
+			} 
+		} 
 	}
 }
