@@ -47,7 +47,7 @@ CONSTRUCT {
 	?publisher	a	<http://id.loc.gov/ontologies/bibframe/Organization> ;
 				schema:name	?pubName .
 
-	?src	a	<http://schema.org/Organization> ;
+	?src	a	<http://id.loc.gov/ontologies/bibframe/Organization> ;
 			schema:name ?src_inst .
 
 	?oclc_node	a	schema:PropertyValue ;

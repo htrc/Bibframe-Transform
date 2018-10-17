@@ -138,7 +138,7 @@
 				<xsl:if test="/rdf:RDF/bf:Item/htrc:contentProviderAgent/@rdf:resource">
 					<xsl:text>, &#10;		"sourceInstitution": {</xsl:text>
 					<xsl:text> &#10;			"name": "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/htrc:contentProviderAgent/@rdf:resource,52)" /><xsl:text>"</xsl:text>
-					<xsl:text>, &#10;			"type": "Organization"</xsl:text>
+					<xsl:text>, &#10;			"type": "http://id.loc.gov/ontologies/bibframe/Organization"</xsl:text>
 					<xsl:text> &#10;		}</xsl:text>
 				</xsl:if>
 				<xsl:text>, &#10;		"mainEntityOfPage": [</xsl:text>

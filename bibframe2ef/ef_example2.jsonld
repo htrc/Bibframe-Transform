@@ -32,7 +32,7 @@
 		"rightsAttributes": "pd", 
 		"sourceInstitution": { 
 			"name": "NYP", 
-			"type": "Organization" 
+			"type": "http://id.loc.gov/ontologies/bibframe/Organization" 
 		}, 
 		"mainEntityOfPage": [ 
 			"http://catalog.hathitrust.org/api/volumes/full/oclc/549525959.json", 
