@@ -80,12 +80,13 @@
 				<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:date">
 					<xsl:text>, &#10;		"pubDate": </xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:date[1]/text(),1,4)" />
 				</xsl:if>
-				<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label">
+				<xsl:call-template name="publisher" />
+<!--				<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label">
 					<xsl:text>, &#10;		"publisher": {</xsl:text>
 					<xsl:text> &#10;			"type": "http://id.loc.gov/ontologies/bibframe/Organization"</xsl:text>
 					<xsl:text>, &#10;			"name": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label/text()" /><xsl:text>"</xsl:text>
 					<xsl:text> &#10;		}</xsl:text>
-				</xsl:if>
+				</xsl:if>-->
 				<xsl:call-template name="pub_place" />
 <!--				<xsl:choose>
 					<xsl:when test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about and /rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/rdfs:label">
@@ -252,6 +253,33 @@
 			<xsl:text> &#10;			"name": "</xsl:text><xsl:value-of select="bf:agent/bf:Agent/rdfs:label/text()" /><xsl:text>"</xsl:text>
 			<xsl:text> &#10;		}</xsl:text>
 		</xsl:for-each>-->
+	</xsl:template>
+
+	<xsl:template name="publisher">
+		<xsl:variable name="publishers" select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label" />
+		<xsl:choose>
+			<xsl:when test="count($publishers) > 1" >
+				<xsl:text>, &#10;		"publisher": [</xsl:text>
+				<xsl:for-each select="$publishers">
+					<xsl:if test="position() != 1">
+						<xsl:text>,</xsl:text>
+					</xsl:if>
+					<xsl:text> &#10;			{</xsl:text>
+					<xsl:text> &#10;				"type": "http://id.loc.gov/ontologies/bibframe/Organization"</xsl:text>
+					<xsl:text>, &#10;				"name": "</xsl:text><xsl:value-of select="./text()" /><xsl:text>"</xsl:text>
+					<xsl:text> &#10;			}</xsl:text>
+				</xsl:for-each>
+				<xsl:text> &#10;		]</xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:if test="count($publishers) = 1" >
+					<xsl:text>, &#10;		"publisher": {</xsl:text>
+					<xsl:text> &#10;			"type": "http://id.loc.gov/ontologies/bibframe/Organization"</xsl:text>
+					<xsl:text>, &#10;			"name": "</xsl:text><xsl:value-of select="$publishers/text()" /><xsl:text>"</xsl:text>
+					<xsl:text> &#10;		}</xsl:text>
+				</xsl:if>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template name="pub_place">
