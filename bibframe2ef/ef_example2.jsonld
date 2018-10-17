@@ -3,7 +3,7 @@
 		"id": "http://hdl.handle.net/2027/uc1.l0052148335", 
 		"type": "PublicationVolume", 
 		"isAccessibleForFree": true, 
-		"title": "Air Force engineering & services quarterly (Tyndall Air Force Base (Fla.) : 1984)", 
+		"title": "Air Force engineering & services quarterly.", 
 		"contributor": { 
 			"type": "http://id.loc.gov/ontologies/bibframe/Organization", 
 			"id": "http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/009645513271019", 
@@ -25,7 +25,7 @@
 			"type": "http://id.loc.gov/ontologies/bibframe/Place" 
 		}, 
 		"inLanguage": "eng", 
-		"rightsAttributes": "pd", 
+		"accessRights": "pd", 
 		"sourceInstitution": { 
 			"name": "UCLA", 
 			"type": "http://id.loc.gov/ontologies/bibframe/Organization" 
@@ -53,16 +53,8 @@
 			"http://id.loc.gov/vocabulary/marcgt/gov" 
 		], 
 		"enumerationChronology": "v.25 no.1 mi.-v.27 no.2 yr.1984-86", 
-		"issueNumber": "no.1 mi.-no.2 yr.1984-86", 
+		"typeOfResource": "http://id.loc.gov/ontologies/bibframe/Text", 
 		"isPartOf": { 
-			"title": "Air Force engineering & services quarterly (Tyndall Air Force Base (Fla.) : 1984)" 
-			"enumerationChronology": "v.25-v.27, 
-			"isPartOf": { 
-				"id": "http://www.worldcat.org/oclc/11125184", 
-				"title": "Air Force engineering & services quarterly (Tyndall Air Force Base (Fla.) : 1984)", 
-				"type": "Periodical", 
-				"issn": "0883-0193" 
-			} 
-		} 
-	}
-}
+			"journalTitle": "Air Force engineering & services quarterly (Tyndall Air Force Base (Fla.) : 1984)", 
+			"type": "http://schema.org/CreativeWorkSeries" 
+		}

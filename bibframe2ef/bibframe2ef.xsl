@@ -73,7 +73,8 @@
 							<xsl:text>false</xsl:text>
 						</xsl:otherwise>
 					</xsl:choose>
-				<xsl:text>, &#10;		"title": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
+<!--				<xsl:text>, &#10;		"title": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>-->
+				<xsl:call-template name="title" />
 				<xsl:call-template name="contribution_agents">
 					<xsl:with-param name="node" select="/rdf:RDF/bf:Work/bf:contribution/bf:Contribution" />
 				</xsl:call-template>
@@ -134,7 +135,7 @@
 					</xsl:otherwise>
 				</xsl:choose>-->
 				<xsl:if test="/rdf:RDF/bf:Item/dct:accessRights">
-					<xsl:text>, &#10;		"rightsAttributes": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Item/dct:accessRights/text()" /><xsl:text>"</xsl:text>
+					<xsl:text>, &#10;		"accessRights": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Item/dct:accessRights/text()" /><xsl:text>"</xsl:text>
 				</xsl:if>
 				<xsl:if test="/rdf:RDF/bf:Item/htrc:contentProviderAgent/@rdf:resource">
 					<xsl:text>, &#10;		"sourceInstitution": {</xsl:text>
@@ -177,7 +178,11 @@
 				<xsl:if test="/rdf:RDF/bf:Item/bf:enumerationAndChronology">
 					<xsl:text>, &#10;		"enumerationChronology": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Item/bf:enumerationAndChronology/text()" /><xsl:text>"</xsl:text>
 				</xsl:if>
-				<xsl:if test="/rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label and /rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label/text() = 'periodical'">
+				<xsl:if test="/rdf:RDF/bf:Work/rdf:type/@rdf:resource">
+					<xsl:text>, &#10;		"typeOfResource": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/rdf:type/@rdf:resource" /><xsl:text>"</xsl:text>
+				</xsl:if>
+				<xsl:call-template name="part_of" />
+<!--				<xsl:if test="/rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label and /rdf:RDF/bf:Instance/bf:genreForm/bf:GenreForm/rdfs:label/text() = 'periodical'">
 					<xsl:if test="matches(/rdf:RDF/bf:Item/bf:enumerationAndChronology/text(),'no.')">
 						<xsl:text>, &#10;		"issueNumber": "</xsl:text>
 						<xsl:choose>
@@ -214,8 +219,13 @@
 					<xsl:text> &#10;		}</xsl:text>
 				</xsl:if>
 				<xsl:text> &#10;	}</xsl:text>
-				<xsl:text>&#10;}</xsl:text>
+				<xsl:text>&#10;}</xsl:text>-->
 		</xsl:result-document>
+	</xsl:template>
+
+	<xsl:template name="title">
+		<xsl:variable name="iss_title" select="/rdf:RDF/bf:Instance/bf:title/bf:Title[not(rdf:type)]" />
+		<xsl:text>, &#10;		"title": "</xsl:text><xsl:value-of select="$iss_title/rdfs:label/text()" /><xsl:text>"</xsl:text>
 	</xsl:template>
 
 	<xsl:template name="contribution_agents"><!-- match="/rdf:RDF/bf:Work/bf:contribution/bf:Contribution/">-->
@@ -436,5 +446,14 @@
 				</xsl:if>
 			</xsl:otherwise>
 		</xsl:choose>-->
+	</xsl:template>
+
+	<xsl:template name="part_of">
+		<xsl:if test="substring(/rdf:RDF/bf:Instance/bf:issuance/bf:Issuance/@rdf:about,39) = 'serl'">
+			<xsl:text>, &#10;		"isPartOf": {</xsl:text>
+			<xsl:text> &#10;			"journalTitle": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
+			<xsl:text>, &#10;			"type": "http://schema.org/CreativeWorkSeries"</xsl:text>
+			<xsl:text> &#10;		}</xsl:text>
+		</xsl:if>
 	</xsl:template>
 </xsl:stylesheet>
