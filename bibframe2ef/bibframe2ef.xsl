@@ -86,11 +86,8 @@
 					<xsl:text>, &#10;			"name": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label/text()" /><xsl:text>"</xsl:text>
 					<xsl:text> &#10;		}</xsl:text>
 				</xsl:if>
-				<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about">
-					
-				</xsl:if>
 				<xsl:call-template name="pub_place" />
-				<xsl:choose>
+<!--				<xsl:choose>
 					<xsl:when test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about and /rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/rdfs:label">
 						<xsl:text>, &#10;		"pubPlace": [</xsl:text>
 						<xsl:text> &#10;			"</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:place/bf:Place/@rdf:about" /><xsl:text>"</xsl:text>
@@ -109,7 +106,7 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xsl:otherwise>
-				</xsl:choose>
+				</xsl:choose>-->
 				<xsl:call-template name="languages" />
 <!--				<xsl:choose>
 					<xsl:when test="/rdf:RDF/bf:Work/bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource">
@@ -145,9 +142,9 @@
 					<xsl:text> &#10;		}</xsl:text>
 				</xsl:if>
 				<xsl:text>, &#10;		"mainEntityOfPage": [</xsl:text>
-				<xsl:text> &#10;			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/bf:itemOf/@rdf:resource,30)" /><xsl:text>.json"</xsl:text>
-				<xsl:text>, &#10;			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/bf:itemOf/@rdf:resource,30)" /><xsl:text>.json"</xsl:text>
-				<xsl:text>, &#10;			"https://catalog.hathitrust.org/api/volumes/full/htid/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/@rdf:about,28)" /><xsl:text>.json"</xsl:text>
+				<xsl:text> &#10;			"http://catalog.hathitrust.org/api/volumes/full/oclc/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/bf:itemOf/@rdf:resource,30)" /><xsl:text>.json"</xsl:text>
+				<xsl:text>, &#10;			"http://catalog.hathitrust.org/api/volumes/brief/oclc/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/bf:itemOf/@rdf:resource,30)" /><xsl:text>.json"</xsl:text>
+				<xsl:text>, &#10;			"https://catalog.hathitrust.org/Record/</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:adminMetadata/bf:AdminMetadata/bf:identifiedBy/bf:Local/rdf:value/text()" /><xsl:text>"</xsl:text>
 				<xsl:text> &#10;		]</xsl:text>
 				<xsl:call-template name="create_identifiers" />
 				<xsl:if test="/rdf:RDF/bf:Instance/bf:identifiedBy/bf:Issn/rdf:value">
@@ -274,7 +271,12 @@
 				<xsl:text> &#10;		]</xsl:text>
 			</xsl:when>
 			<xsl:otherwise>
-
+				<xsl:if test="count($pub_places) = 1">
+					<xsl:text>, &#10;		"pubPlace": {</xsl:text>
+					<xsl:text> &#10;			"id": "</xsl:text><xsl:value-of select="$pub_places" /><xsl:text>"</xsl:text>
+					<xsl:text>, &#10;			"type": "http://id.loc.gov/ontologies/bibframe/Place"</xsl:text>
+					<xsl:text> &#10;		}</xsl:text>
+				</xsl:if>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -290,6 +292,9 @@
 				<xsl:variable name="lang_combined" select="/rdf:RDF/bf:Work/bf:language/bf:Language/@rdf:about | /rdf:RDF/bf:Work/bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource" />
 				<xsl:text>, &#10;		"inLanguage": [</xsl:text>
 				<xsl:for-each select="distinct-values($lang_combined)">
+					<xsl:if test="position() != 1">
+						<xsl:text>,</xsl:text>
+					</xsl:if>
 					<xsl:text> &#10;			"</xsl:text><xsl:value-of select="substring(.,40)" /><xsl:text>"</xsl:text>
 				</xsl:for-each>
 				<xsl:text> &#10;		]</xsl:text>

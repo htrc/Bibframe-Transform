@@ -34,4 +34,5 @@ viaf_index*
 /bibframe2ef/fixSolr.py
 /bibframe2ef/checkIngested.py
 /bibframe2ef/node_modules*
+/bibframe2ef/framing-compacting-example*
 /ic_az*

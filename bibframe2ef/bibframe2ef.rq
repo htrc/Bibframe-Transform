@@ -14,7 +14,7 @@ prefix schema: <http://schema.org/>
 
 CONSTRUCT {
 	?item	a	?iss ;
-			htrc:volume_name	?title ;
+			htrc:itemName	?title ;
 			htrc:enumerationChronology	?enumChron ;
 			schema:contributor	?Contrib ;
 			schema:publisher	?publisher ;
@@ -41,21 +41,21 @@ CONSTRUCT {
 	?Contrib	schema:name	?Name ;
 				rdf:type ?ContribType .
 
-	?part_of	htrc:volume_name ?work_title ;
+	?part_of	htrc:journalName ?work_title ;
 				rdf:type	<http://schema.org/CreativeWorkSeries> .
 
 	?publisher	a	<http://id.loc.gov/ontologies/bibframe/Organization> ;
 				schema:name	?pubName .
 
-	?src	a	<http://id.loc.gov/ontologies/bibframe/Organization> ;
+	?src	a	<http://schema.org/Organization> ;
 			schema:name ?src_inst .
 
 	?oclc_node	a	schema:PropertyValue ;
-				schema:propertyID	"oclc" ;
+				schema:propertyID	"oclc"^^schema:Text ;
 				schema:value	?oclcNo .
 
 	?Lccn	a	schema:PropertyValue ;
-			schema:propertyID	"lccn" ;
+			schema:propertyID	"lccn"^^schema:Text ;
 			schema:value	?lccn_str .
 }
 WHERE {
@@ -131,10 +131,10 @@ WHERE {
 	OPTIONAL {	?Work	bf:genreForm	?genre . }
 	OPTIONAL {	?Work	bf:language	?lang . 
 						FILTER(!ISBLANK(?lang)) 
-						BIND(SUBSTR(STR(?lang),40) as ?str_lang)
+						BIND(STRDT(SUBSTR(STR(?lang),40),schema:Text) as ?str_lang)
 	}
 	OPTIONAL { ?Work	bf:language/bf:identifiedBy/rdf:value	?node_lang . 
-						BIND(SUBSTR(STR(?node_lang),40) as ?node_str_lang)
+						BIND(STRDT(SUBSTR(STR(?node_lang),40),schema:Text) as ?node_str_lang)
 	}
 	OPTIONAL {	?Work	rdf:type	?type . 
 						filter ( ?type != <http://id.loc.gov/ontologies/bibframe/Work> )

@@ -1,13 +1,52 @@
 , 
 	"metadata": { 
-		"id": "", 
-		"type": "CreativeWork", 
-		"isAccessibleForFree": false, 
-		"title": "", 
+		"id": "http://hdl.handle.net/2027/nyp.33433000357651", 
+		"type": "Book", 
+		"isAccessibleForFree": true, 
+		"title": "Vollständiges Diarium von der höchst-beglückten Erwehlung des allerdurchlauchtigsten grossmächtigsten und unüberwindlichsten Fürsten und Herrn, Herrn Franciscus Königs zu Lothringen und Saar, Gross-Herzogs zu Toscana, Herzogs zu Calabern, Seldern, Montserrat, inzwischen zu Teschen, Fürsten zu Charleville, Marggrafen zu Pont a Mousson und Komenn, Grafen zu Provinz Vaudemont, Blanckenburg, Zütphen, Jaarweden, Jalm und Falckenstein, ac., ac., zum Römischen König und Kayser : worin die merckwürdigsten Handlungen und Begebeniten enthalten, mit Kupfferstischen und schematischen Vorstellungen versehen : nebst einer Vorrede von den Vorzügen des regierenden Hauses bey den Teutschen Königs- und Kayser-Wahlen.", 
+		"contributor": [ 
+			{ 
+				"type": "http://id.loc.gov/ontologies/bibframe/Person", 
+				"id": "http://www.viaf.org/viaf/266519174", 
+				"name": "Francis I, Holy Roman Emperor, 1708-1765." 
+			}, 
+			{ 
+				"type": "http://id.loc.gov/ontologies/bibframe/Person", 
+				"id": "http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/012314990270028", 
+				"name": "Olenschlager, Johann Daniel von, 1711-1778." 
+			} 
+		], 
+		"pubDate": 1746, 
+		"publisher": { 
+			"type": "http://id.loc.gov/ontologies/bibframe/Organization", 
+			"name": "Verlegt von Johann David Jung" 
+		}, 
+		"pubPlace": { 
+			"id": "http://id.loc.gov/vocabulary/countries/gw", 
+			"type": "http://id.loc.gov/ontologies/bibframe/Place" 
+		}, 
+		"inLanguage": [ 
+			"ger", 
+			"lat" 
+		], 
+		"rightsAttributes": "pd", 
+		"sourceInstitution": { 
+			"name": "NYP", 
+			"type": "Organization" 
+		}, 
 		"mainEntityOfPage": [ 
-			"https://catalog.hathitrust.org/api/volumes/full/recordnumber/.json", 
-			"https://catalog.hathitrust.org/api/volumes/brief/recordnumber/.json", 
-			"https://catalog.hathitrust.org/api/volumes/full/htid/.json" 
+			"http://catalog.hathitrust.org/api/volumes/full/oclc/549525959.json", 
+			"http://catalog.hathitrust.org/api/volumes/brief/oclc/549525959.json", 
+			"https://catalog.hathitrust.org/Record/012314990" 
+		], 
+		"identifier": { 
+			"type": "PropertyValue", 
+			"propertyID": "oclc", 
+			"value": "549525959" 
+		}, 
+		"genre": [ 
+			"http://id.loc.gov/vocabulary/marcgt/doc", 
+			"_:b012314990365527" 
 		] 
 	}
 }

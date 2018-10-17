@@ -118,7 +118,7 @@ function buildSolrJSON(handle,revised) {
 	}
 
 	if ('sourceInstitution' in revised['metadata']) {
-		solr_json['sourceOrvanization'] = revised['metadata']['sourceInstitution']['name'];
+		solr_json['sourceOrganization'] = revised['metadata']['sourceInstitution']['name'];
 	}
 
 	fs.writeFile('./solr_results/' + handle.substring(27).replace(/\//g,'=').replace(/\:/g,'+') + '_solr.json', JSON.stringify(solr_json,null,4), function(err) {
@@ -133,34 +133,25 @@ function processResults(bd,handle,doneCallback) {
 	try {
 		console.log("REQUEST WORKED");
 		console.log("Response: %s",bd);
-
-/*		fs.writeFile('./results/' + encodeURIComponent(handle.substring(27)) + '.json', bd, function(err) {
-			if(err) {
-				var return_object = {}
-				return_object[handle.substring(27)] = "FAILED";
-				return doneCallback(err,return_object);
+		var json_bd = JSON.parse(bd)
+		for (section in json_bd['@graph']) {
+			if ('http://schema.org/isAccessibleForFree' in json_bd['@graph'][section]) {
+				if (json_bd['@graph'][section]['http://schema.org/isAccessibleForFree'][0]['@value'] == "true") {
+					json_bd['@graph'][section]['http://schema.org/isAccessibleForFree'][0]['@value'] = true;
+				}
+				else {
+					json_bd['@graph'][section]['http://schema.org/isAccessibleForFree'][0]['@value'] = false;
+				}
 			}
-			console.log("The file was saved");
-			var return_object = {}
-			return_object[handle.substring(27)] = "SUCCESS";
-			console.log(return_object);
-			return doneCallback(null,return_object);
-		});*/
+		}
 
 		var promises = jsonld.promises;
-		var promise = promises.frame(JSON.parse(bd),'https://worksets.htrc.illinois.edu/context/ef_context_old.json');
+		var promise = promises.frame(json_bd,'https://worksets.htrc.illinois.edu/context/ef_context.json');
 		promise.then(function(framed) {
 			console.log(JSON.stringify(framed,null,4));
 			var revised = framed;
 			delete revised['@context'];
 			revised['metadata'] = revised['metadata'][0];
-			
-			if (revised['metadata']['isAccessibleForFree'] == "true") {
-				revised['metadata']['isAccessibleForFree'] = true;
-			}
-			else {
-				revised['metadata']['isAccessibleForFree'] = false;
-			}
 
 			if (revised['metadata']['sourceInstitution'] instanceof Array) {
 				for (var src of revised['metadata']['sourceInstitution']) {
@@ -293,138 +284,6 @@ function sendQuery(filename,handle,doneCallback) {
 function createEF(handle,doneCallback) {
 	handle = 'http://hdl.handle.net/2027/' + handle;
 	sendQuery('./bibframe2ef.rq',handle,doneCallback);
-/*	fs.readFile('./bibframe2ef.rq','utf8', function(err,data) {
-		var test_query = data;
-		test_query = test_query.replace('?handle_url','<' + handle + '>');
-
-		console.log(test_query);
-
-		try {
-			request({
-				method: 'POST',
-				uri: 'https://worksets.htrc.illinois.edu/sparql/',
-				headers: {
-					'Content-Type': 'application/x-www-form-unencoded',
-				},
-				form: {
-					'default-graph-uri': '',
-					'query': test_query,
-					'format': 'application/ld+json'
-				}
-			}, function (er,rs,bd) {
-				if (er) {
-					console.log("ERROR IN SENDING REQUEST");
-					console.log(er);
-
-
-					var return_object = {};
-					return_object[handle.substring(27)] = "FAILED";
-					return doneCallback(null,return_object);
-				}
-				else {
-					if (bd.indexOf('504 Gateway Time-out') == -1) {
-						return processResults(bd,handle,doneCallback)
-					}
-					else {
-						fs.readFile('./bibframe2ef_abridged.rq','utf8',function(e,d) {
-							var second_query = d;
-							second_query = second_query.replace('?handle_url','<' + handle + '>');
-							console.log(second_query);
-
-							try {
-								request({
-									method: 'POST',
-									uri: 'https://worksets.htrc.illinois.edu/sparql/',
-									headers: {
-										'Content-Type': 'application/x-www-form-unencoded',
-									},
-									form: {
-										'default-graph-uri': '',
-										'query': second_query,
-										'format': 'application/ld+json'
-									}
-								}, function (err,rsp,bdy) {
-									if (err) {
-										console.log("ERROR IN SENDING REQUEST");
-										console.log(err);
-
-
-										var return_object = {};
-										return_object[handle.substring(27)] = "FAILED";
-										return doneCallback(null,return_object);
-									}
-									else {
-										if (bdy.indexOf('504 Gateway Time-out') == -1) {
-											return processResults(bdy,handle,doneCallback)
-										}
-										else {
-											fs.readFile('./bibframe2ef_very_abridged.rq','utf8',function(e,d) {
-												var third_query = d;
-												third_query = third_query.replace('?handle_url','<' + handle + '>');
-												console.log("Third Query");
-												console.log(third_query);
-
-												try {
-													request({
-														method: 'POST',
-														uri: 'https://worksets.htrc.illinois.edu/sparql/',
-														headers: {
-															'Content-Type': 'application/x-www-form-unencoded',
-														},
-														form: {
-															'default-graph-uri': '',
-															'query': third_query,
-															'format': 'application/ld+json'
-														}
-													}, function (err,rsp,bdy) {
-														if (err) {
-															console.log("ERROR IN SENDING REQUEST");
-															console.log(err);
-
-
-															var return_object = {};
-															return_object[handle.substring(27)] = "FAILED";
-															return doneCallback(null,return_object);
-														}
-														else {
-															if (bdy.indexOf('504 Gateway Time-out') == -1) {
-																return processResults(bdy,handle,doneCallback)
-															}
-															else {
-																var return_object = {};
-																return_object[handle.substring(27)] = "FAILED";
-																return doneCallback(null,return_object);
-															}
-														}
-													})
-												} catch (err) {
-													var return_object = {}
-													return_object[handle.substring(27)] = "FAILED";
-													return doneCallback(null,return_object);
-												}
-											})
-										}
-									}
-								})
-							} catch (err) {
-								var return_object = {}
-								return_object[handle.substring(27)] = "FAILED";
-								return doneCallback(null,return_object);
-							}
-						})
-					}
-//					var return_object = processResults(bd,handle);
-//					console.log(return_object);
-//					return doneCallback(null,return_object);
-				}
-			})	
-		} catch (err) {
-			var return_object = {}
-			return_object[handle.substring(27)] = "FAILED";
-			return doneCallback(null,return_object);
-		}
-		
-	});*/
 }
 
 function onComplete(err,results) {
@@ -480,6 +339,7 @@ fs.readFile(read_file,'utf8',function(err,data) {
 			handles.push(handle);
 		}
 	}
+	handles = ['mdp.39015013324911']
 
 	processHandleList(handles,results);
 })
