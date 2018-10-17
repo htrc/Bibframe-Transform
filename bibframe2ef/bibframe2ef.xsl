@@ -13,7 +13,8 @@
 	<xsl:template match='/'>
 <!--		<xsl:variable name="saveAs" select="ef_example.jsonld"/>-->
 
-		<xsl:result-document href="ef_example2.jsonld" method='text' exclude-result-prefixes="#all" omit-xml-declaration="yes" indent="no" encoding="UTF-8">
+		<xsl:result-document href="ef_example2.json" method='text' exclude-result-prefixes="#all" omit-xml-declaration="yes" indent="no" encoding="UTF-8">
+			<xsl:text>{</xsl:text>
 <!--				<xsl:text>{ &#10;	"@context": [</xsl:text>
 				<xsl:text> &#10;		"http://schema.org"</xsl:text>
 				<xsl:text>, &#10;		{</xsl:text>
@@ -46,7 +47,7 @@
 				<xsl:text>, &#10;	"type": "Dataset"</xsl:text>
 				<xsl:text>, &#10;	"schemaVersion": "https://wiki.htrc.illinois.edu/display/COM/Extracted+Features+Dataset_2.0"</xsl:text>
 				<xsl:text>, &#10;	"sourceInstitution": "htrc"</xsl:text>-->
-				<xsl:text>, &#10;	"metadata": {</xsl:text>
+				<xsl:text> &#10;	"metadata": {</xsl:text>
 				<xsl:text> &#10;		"id": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Item/@rdf:about" /><xsl:text>"</xsl:text>
 				<xsl:choose>
 					<xsl:when test="substring(/rdf:RDF/bf:Instance/bf:issuance/bf:Issuance/@rdf:about,39) = 'mono'">
@@ -79,7 +80,7 @@
 					<xsl:with-param name="node" select="/rdf:RDF/bf:Work/bf:contribution/bf:Contribution" />
 				</xsl:call-template>
 				<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:date">
-					<xsl:text>, &#10;		"pubDate": </xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:date[1]/text(),1,4)" />
+					<xsl:text>, &#10;		"pubDate": </xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/dct:created/text(),1,4)" />
 				</xsl:if>
 				<xsl:call-template name="publisher" />
 <!--				<xsl:if test="/rdf:RDF/bf:Instance/bf:provisionActivity/bf:ProvisionActivity/bf:agent/bf:Agent/rdfs:label">
@@ -139,13 +140,13 @@
 				</xsl:if>
 				<xsl:if test="/rdf:RDF/bf:Item/htrc:contentProviderAgent/@rdf:resource">
 					<xsl:text>, &#10;		"sourceInstitution": {</xsl:text>
-					<xsl:text> &#10;			"name": "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/htrc:contentProviderAgent/@rdf:resource,52)" /><xsl:text>"</xsl:text>
-					<xsl:text>, &#10;			"type": "http://id.loc.gov/ontologies/bibframe/Organization"</xsl:text>
+					<xsl:text> &#10;			"type": "http://id.loc.gov/ontologies/bibframe/Organization"</xsl:text>
+					<xsl:text>, &#10;			"name": "</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/htrc:contentProviderAgent/@rdf:resource,52)" /><xsl:text>"</xsl:text>
 					<xsl:text> &#10;		}</xsl:text>
 				</xsl:if>
 				<xsl:text>, &#10;		"mainEntityOfPage": [</xsl:text>
-				<xsl:text> &#10;			"http://catalog.hathitrust.org/api/volumes/full/oclc/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/bf:itemOf/@rdf:resource,30)" /><xsl:text>.json"</xsl:text>
-				<xsl:text>, &#10;			"http://catalog.hathitrust.org/api/volumes/brief/oclc/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/bf:itemOf/@rdf:resource,30)" /><xsl:text>.json"</xsl:text>
+				<xsl:text> &#10;			"http://catalog.hathitrust.org/api/volumes/brief/oclc/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/bf:itemOf/@rdf:resource,30)" /><xsl:text>.json"</xsl:text>
+				<xsl:text>, &#10;			"http://catalog.hathitrust.org/api/volumes/full/oclc/</xsl:text><xsl:value-of select="substring(/rdf:RDF/bf:Item/bf:itemOf/@rdf:resource,30)" /><xsl:text>.json"</xsl:text>
 				<xsl:text>, &#10;			"https://catalog.hathitrust.org/Record/</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:adminMetadata/bf:AdminMetadata/bf:identifiedBy/bf:Local/rdf:value/text()" /><xsl:text>"</xsl:text>
 				<xsl:text> &#10;		]</xsl:text>
 				<xsl:call-template name="create_identifiers" />
@@ -155,7 +156,7 @@
 				<xsl:if test="/rdf:RDF/bf:Instance/bf:identifiedBy/bf:Isbn/rdf:value">
 					<xsl:text>, &#10;		"issn": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/bf:identifiedBy/bf:Isbn/rdf:value/text()" /><xsl:text>"</xsl:text>
 				</xsl:if>
-				<xsl:if test="/rdf:RDF/bf:Work/bf:genreForm/bf:GenreForm/@rdf:about">
+<!--				<xsl:if test="/rdf:RDF/bf:Work/bf:genreForm/bf:GenreForm/@rdf:about">
 					<xsl:variable name="genre_count" select="count(/rdf:RDF/bf:Work/bf:genreForm/bf:GenreForm/@rdf:about)" />
 					<xsl:choose>
 						<xsl:when test="$genre_count = 1">
@@ -174,7 +175,8 @@
 							</xsl:if>
 						</xsl:otherwise>
 					</xsl:choose>
-				</xsl:if>
+				</xsl:if>-->
+				<xsl:call-template name="genre" />
 				<xsl:if test="/rdf:RDF/bf:Item/bf:enumerationAndChronology">
 					<xsl:text>, &#10;		"enumerationChronology": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Item/bf:enumerationAndChronology/text()" /><xsl:text>"</xsl:text>
 				</xsl:if>
@@ -218,8 +220,8 @@
 					<xsl:text> &#10;			}</xsl:text>
 					<xsl:text> &#10;		}</xsl:text>
 				</xsl:if>
-				<xsl:text> &#10;	}</xsl:text>
-				<xsl:text>&#10;}</xsl:text>-->
+				<xsl:text> &#10;	}</xsl:text>-->
+				<xsl:text>&#10;}</xsl:text>
 		</xsl:result-document>
 	</xsl:template>
 
@@ -394,7 +396,7 @@
 						</xsl:if>
 						<xsl:text> &#10;			{</xsl:text>
 						<xsl:text> &#10;				"type": "PropertyValue"</xsl:text>
-						<xsl:text>, &#10;				"propertyID": lcc"</xsl:text>
+						<xsl:text>, &#10;				"propertyID": "lcc"</xsl:text>
 						<xsl:text>, &#10;				"value": "</xsl:text><xsl:value-of select="./bf:classificationPortion/text()" /><xsl:text> </xsl:text><xsl:value-of select="./bf:itemPortion/text()" /><xsl:text>"</xsl:text>
 						<xsl:text> &#10;			}</xsl:text>
 					</xsl:for-each>
@@ -404,7 +406,7 @@
 						</xsl:if>
 						<xsl:text> &#10;			{</xsl:text>
 						<xsl:text> &#10;				"type": "PropertyValue"</xsl:text>
-						<xsl:text>, &#10;				"propertyID": lccn"</xsl:text>
+						<xsl:text>, &#10;				"propertyID": "lccn"</xsl:text>
 						<xsl:text>, &#10;				"value": "</xsl:text><xsl:value-of select="./text()" /><xsl:text>"</xsl:text>
 						<xsl:text> &#10;			}</xsl:text>
 					</xsl:for-each>
@@ -414,7 +416,7 @@
 						</xsl:if>
 						<xsl:text> &#10;			{</xsl:text>
 						<xsl:text> &#10;				"type": "PropertyValue"</xsl:text>
-						<xsl:text>, &#10;				"propertyID": oclc"</xsl:text>
+						<xsl:text>, &#10;				"propertyID": "oclc"</xsl:text>
 						<xsl:text>, &#10;				"value": "</xsl:text><xsl:value-of select="./rdf:value/text()" /><xsl:text>"</xsl:text>
 						<xsl:text> &#10;			}</xsl:text>
 					</xsl:for-each>
@@ -448,11 +450,33 @@
 		</xsl:choose>-->
 	</xsl:template>
 
+	<xsl:template name="genre">
+		<xsl:variable name="genres" select="/rdf:RDF/bf:Work/bf:genreForm/bf:GenreForm/@rdf:about[substring(.,1,1) != '_']" />
+		<xsl:choose>
+			<xsl:when test="count($genres) > 1">
+				<xsl:text>, &#10;		"genre": [</xsl:text>
+				<xsl:for-each select="$genres">
+					<xsl:if test="position() != 1">
+						<xsl:text>,</xsl:text>
+					</xsl:if>
+					<xsl:text> &#10;			"</xsl:text><xsl:value-of select="." /><xsl:text>"</xsl:text>
+				</xsl:for-each>
+				<xsl:text> &#10;		]</xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:if test="count($genres) = 1">
+					<xsl:text>, &#10;		"genre": "</xsl:text><xsl:value-of select="$genres" /><xsl:text>"</xsl:text>
+				</xsl:if>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
 	<xsl:template name="part_of">
 		<xsl:if test="substring(/rdf:RDF/bf:Instance/bf:issuance/bf:Issuance/@rdf:about,39) = 'serl'">
 			<xsl:text>, &#10;		"isPartOf": {</xsl:text>
-			<xsl:text> &#10;			"journalTitle": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
-			<xsl:text>, &#10;			"type": "http://schema.org/CreativeWorkSeries"</xsl:text>
+			<xsl:text> &#10;			"id": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Instance/@rdf:about" /><xsl:text>"</xsl:text>
+			<xsl:text>, &#10;			"type": "CreativeWorkSeries"</xsl:text>
+			<xsl:text>, &#10;			"journalTitle": "</xsl:text><xsl:value-of select="/rdf:RDF/bf:Work/bf:title/bf:Title/rdfs:label/text()" /><xsl:text>"</xsl:text>
 			<xsl:text> &#10;		}</xsl:text>
 		</xsl:if>
 	</xsl:template>

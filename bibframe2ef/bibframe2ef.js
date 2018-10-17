@@ -339,7 +339,7 @@ fs.readFile(read_file,'utf8',function(err,data) {
 			handles.push(handle);
 		}
 	}
-	handles = ['mdp.39015013324911']
+	handles = ['uc1.l0052148335']
 
 	processHandleList(handles,results);
 })
