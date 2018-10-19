@@ -5,15 +5,21 @@
 				xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
 				xmlns:bf="http://id.loc.gov/ontologies/bibframe/"
 				xmlns:dct="http://purl.org/dc/terms/"
-				xmlns:htrc="http://wcsa.htrc.illinois.edu/">
+				xmlns:htrc="http://wcsa.htrc.illinois.edu/"
+				xmlns:ext="http://exslt.org/common">
+
+<xsl:output method="text" encoding="UTF-8" omit-xml-declaration="yes" />
+
+<xsl:key name="lang_combined" match="@rdf:about | @rdf:resource" use="." />
 
 <!--	<xsl:ourput encoding="UTF-8" method="text" />
 	<xsl:strip-space elements="*"/>-->
 
 	<xsl:template match='/'>
+		<xsl:variable name="vFilePath" select="ext:node-set(/rdf:RDF/bf:Work)" />
 <!--		<xsl:variable name="saveAs" select="ef_example.jsonld"/>-->
-
-		<xsl:result-document href="ef_example2.json" method='text' exclude-result-prefixes="#all" omit-xml-declaration="yes" indent="no" encoding="UTF-8">
+		<xsl:variable name="volume_id" select="substring(/rdf:RDF/bf:Item/@rdf:about,27)" />
+<!--		<xsl:result-document href="/Users/dkudeki-admin/Documents/GitHub/Bibframe-Transform/bibframe2ef/results_xsl/{$volume_id}.json" method='text' exclude-result-prefixes="#all" omit-xml-declaration="yes" indent="no" encoding="UTF-8">-->
 			<xsl:text>{</xsl:text>
 <!--				<xsl:text>{ &#10;	"@context": [</xsl:text>
 				<xsl:text> &#10;		"http://schema.org"</xsl:text>
@@ -110,7 +116,9 @@
 						</xsl:choose>
 					</xsl:otherwise>
 				</xsl:choose>-->
-				<xsl:call-template name="languages" />
+				<xsl:call-template name="languages">
+					<xsl:with-param name="vfp" select="$vFilePath" />
+				</xsl:call-template>
 <!--				<xsl:choose>
 					<xsl:when test="/rdf:RDF/bf:Work/bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource">
 						<xsl:choose>
@@ -222,7 +230,7 @@
 				</xsl:if>
 				<xsl:text> &#10;	}</xsl:text>-->
 				<xsl:text>&#10;}</xsl:text>
-		</xsl:result-document>
+<!--		</xsl:result-document>-->
 	</xsl:template>
 
 	<xsl:template name="title">
@@ -322,6 +330,7 @@
 	</xsl:template>
 
 	<xsl:template name="languages">
+		<xsl:param name="vfp" />
 		<xsl:variable name="lang_strs" select="/rdf:RDF/bf:Work/bf:language/bf:Language/@rdf:about" />
 		<xsl:variable name="lang_nodes" select="/rdf:RDF/bf:Work/bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource" />
 		<xsl:variable name="lang_strs_count" select="count($lang_strs)" />
@@ -329,15 +338,23 @@
 		<xsl:variable name="lang_count" select="$lang_strs_count + $lang_nodes_count" />
 		<xsl:choose>
 			<xsl:when test="$lang_count > 1">
-				<xsl:variable name="lang_combined" select="/rdf:RDF/bf:Work/bf:language/bf:Language/@rdf:about | /rdf:RDF/bf:Work/bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource" />
 				<xsl:text>, &#10;		"inLanguage": [</xsl:text>
-				<xsl:for-each select="distinct-values($lang_combined)">
+					<xsl:for-each select="$vfp">
+						<xsl:for-each select="./bf:language/bf:Language/@rdf:about[generate-id() = generate-id(key('lang_combined',.)[1])] | ./bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource[generate-id() = generate-id(key('lang_combined',.)[1])]">
+							<xsl:if test="position() != 1">
+								<xsl:text>,</xsl:text>
+							</xsl:if>
+							<xsl:text> &#10;			"</xsl:text><xsl:value-of select="substring(.,40)" /><xsl:text>"</xsl:text>
+						</xsl:for-each>
+					</xsl:for-each>
+				<xsl:text> &#10;		]</xsl:text>
+<!--				<xsl:variable name="lang_combined" select="/rdf:RDF/bf:Work/bf:language/bf:Language/@rdf:about | /rdf:RDF/bf:Work/bf:language/bf:Language/bf:identifiedBy/bf:Identifier/rdf:value/@rdf:resource" />-->
+<!--				<xsl:for-each select="$lang_combined">
 					<xsl:if test="position() != 1">
 						<xsl:text>,</xsl:text>
 					</xsl:if>
 					<xsl:text> &#10;			"</xsl:text><xsl:value-of select="substring(.,40)" /><xsl:text>"</xsl:text>
-				</xsl:for-each>
-				<xsl:text> &#10;		]</xsl:text>
+				</xsl:for-each>-->
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:if test="$lang_count = 1">
