@@ -11,9 +11,13 @@ The following is a description of the pipeline used to create the initial run of
 For each MARC record processed, `removeRedundant.py` checks a mySQL database for the MARC record's OCLC number. If the OCLC number is there, the record is truncated to just the 001, 035 and 974 fields. If the OCLC number is not present, the record is not modified, and the OCLC number is stored in the database.
 
 ### Usage
-```python removeRedundant.py [folder name]```
+```
+python removeRedundant.py [folder name]
+```
 To start the process over from scratch and wipe the database that has already been built up run:
-```python removeRedundant.py [folder name] -restart```
+```
+python removeRedundant.py [folder name] -restart
+```
 
 ### Example files
 An example raw JSON file that needs to be processed to remove redundant data can be found in [./examples/marc_json/google_segment_aa](./examples/marc_json/google_segment_aa).
@@ -26,9 +30,13 @@ We use an XSL stylesheet provided by the Library of Congress to create BIBFRAME 
 __A Note About convertMARC.py:__ This file pulls triple duty. It converts JSON to MARCXML, then calls the XSL stylesheet that converts MARCXML to BIBFRAME, then it calls the the script that adds VIAF, LOC & WorldCat URLs to the converted BIBFRAME files. The comments in this file will denote which section does what, but as-is, this file is meant to go from trimmed JSON to finished BIBFRAME output.
 
 ### Usage
-```python convertMARC.py [folder name]```
+```
+python convertMARC.py [folder name]
+```
 If you already have a folder of MARCXML files that you want to convert to BIBFRAME, you can skip the JSON to MARCXML conversion by adding `-xml` to the input like so:
-```python convertMARC.py [folder name] -xml```
+```
+python convertMARC.py [folder name] -xml
+```
 
 ### Example files
 An example MARCXML built from the example trimmed file can be found in [./examples/trimmed_marc_json_XML_records/google_segment_aa.xml](./examples/trimmed_marc_json_XML_records/google_segment_aa.xml)
@@ -39,9 +47,13 @@ Once we have a folder containing MARCXML files, we need to apply the [marc2bibfr
 In case you aren't familiar with the BIBFRAME structure, each MARC record is turned into three different nodes: `<bf:Item>`, `<bf:Instance>`, `<bf:Work>`. The Item and Work both have field that point to the Instance, and the Instance has fields that points to the Item and the Work. Within the XML structure, the Item, Instance and Work nodes are all siblings.
 
 ### Usage
-```python convertMARC.py [folder name]```
+```
+python convertMARC.py [folder name]
+```
 If you already have a folder of MARCXML files that you want to convert to BIBFRAME, you can skip the JSON to MARCXML conversion by adding `-xml` to the input like so:
-```python convertMARC.py [folder name] -xml```
+```
+python convertMARC.py [folder name] -xml
+```
 
 ### Example files
 An example BIBFRAME file built from the example trimmed file can be found in [./examples/trimmed_marc_json_BIBF_records/google_segment_aa.xml](./examples/trimmed_marc_json_BIBF_records/BIBF_google_segment_aa.xml)
@@ -64,7 +76,9 @@ __Resources:__ Specifications on the VIAF AutoSuggest API can be found [here](ht
 
 #### LCSH
 When a record has a topic agent or a subject agent, we search LOC for that agent. We build our search query to follow the format:
-```'https://id.loc.gov/search/?q=' + agent_string + '+rdftype:' + agent_type + '&q=cs%3Ahttp%3A%2F%2Fid.loc.gov%2Fauthorities%2Fsubjects'```
+```
+'https://id.loc.gov/search/?q=' + agent_string + '+rdftype:' + agent_type + '&q=cs%3Ahttp%3A%2F%2Fid.loc.gov%2Fauthorities%2Fsubjects'
+```
 `agent_string` is the subject/topic string
 `agent_type` is going to be one of the following values: 'CorporateName', 'FamilyName', 'Topic'. 'Geographic', or 'ComplexSubject'. The values here depend on what the listed `rdf:type` is in the BIBFRAME
 
