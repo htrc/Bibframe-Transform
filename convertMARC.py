@@ -43,6 +43,7 @@ def makeOutputFolder(folder_name,counter):
 		else:
 			return makeOutputFolder(folder_name,0)
 
+#	rootdir is either a folder containing JSON files to be converted or XML files to be converted
 def traverseFiles(rootdir):
 	print(rootdir)
 #	rootdir = 'sample_starting_records'
@@ -56,6 +57,7 @@ def traverseFiles(rootdir):
 
 	bibf_results_folder_name = getFolder(rootdir + '_BIBF_records/')
 
+	# If the process was stopped prematurely, we want to restart based on the last file that was being worked on
 	newest_bibf_file = ''
 	try:
 		newest_bibf_file = max(glob.glob(bibf_results_folder_name + '*.xml'), key=os.path.getmtime)
@@ -84,6 +86,7 @@ def traverseFiles(rootdir):
 					start_time = datetime.datetime.now().time()
 
 					print(read_format)
+					# Convert JSON files into MARCXML
 					if read_format == 'json':
 						print("Starting output writer")
 						output_writer = pymarc.XMLWriter(open(results_folder_name + SLASH + name + '.xml','wb'))
@@ -92,6 +95,7 @@ def traverseFiles(rootdir):
 						output_writer.close()
 
 					print("Opening output file")
+					# Convert MARCXML into BIBFRAME
 					if read_format == 'json':
 						bibf_output_file = bibf_results_folder_name + SLASH + 'BIBF_' + name + '.xml'
 						xml_input_file = results_folder_name + SLASH + name + '.xml'
@@ -104,10 +108,9 @@ def traverseFiles(rootdir):
 					print("Running bash script")
 					bashCommand = 'xsltproc marc2bibframe2/xsl/marc2bibframe2.xsl ' + xml_input_file
 					process = subprocess.call(bashCommand.split(), stdout=bibf_output)
-	#				ps = subprocess.Popen(['xsltproc', 'marc2bibframe2/xsl/marc2bibframe2.xsl'], stdout=subprocess.PIPE)
-	#				print("Ran first half")
-	#				output = subprocess.call(['python', 'postConversionTransform.py', results_folder_name + SLASH + name + '.xml'], stdin=ps.stdout)#, stdout=bibf_output)
+
 					print("Converted " + name)
+					# Enchance converted BIBFRAME by adding Linked Data URLs
 					postConversionTransform.postConversionTransform(bibf_output_file)
 
 					end_time = datetime.datetime.now().time()
