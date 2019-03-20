@@ -2,7 +2,6 @@
 test_input.txt
 two_oclc.xml
 viaf_index*
-*.json
 *.pyc
 *.zip
 *.ttl
