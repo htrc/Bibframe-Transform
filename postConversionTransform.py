@@ -22,6 +22,11 @@ def sanitizeMatchString(match_string):
 #	Often, this is converting an example.org ID or Instance ID into something more useful. We can generate a 
 #	useful, reusable id for persons and subjects, but outside of that, we generate a blank node. Most of this
 #	logic is for handling example.org cases and deriving our own code.
+#
+# NOTE: This presents some challenges to parallelization. If we mint a URL for a person or subject to use 
+#	internally, we want to keep using that same URL every time that person or subject appears in the data.
+#	This means that whatever internal URLs are created need to be stored somewhere and checked for before any
+#	new URL is minted. 
 def convertFillerURI(filler_uri,mode=None):
 	if mode == 'person':
 		prefix = 'http://catalogdata.library.illinois.edu/lod/entities/Persons/ht/'
