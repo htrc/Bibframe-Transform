@@ -663,11 +663,10 @@ def getWorldCatData(root,works,work_ids,timesheet):
 #	returns suggestions for single government institution associated with a given country, which is causes a major 
 #	time sink to sift through.
 #
-# NOTE 1: After we've added links to all the records in the file, we look for any instances of example.org urls that 
-#	are still in the file, and we replace them with generated blank nodes. We don't use the example.org urls because
-#	those tend to be reused, so they would collide in Virtuoso. Instead we generate blank nodes for them.
+# After we've added links to all the records in the file, we look for any instances of example.org urls that 
+#	are still in the file, and we replace them with generated blank nodes.
 #
-# NOTE 2: In each record that is processed, the URLs are generated sequentially in the following order: Work ID, 
+# NOTE: In each record that is processed, the URLs are generated sequentially in the following order: Work ID, 
 #	Subject Agents, Topic Agents, Contribution Agents. This seems like a good place for parallelism. While obviously 
 #	each Work can be processed in parallel, none of these groups are actually dependent on each other, so they could 
 #	also be processed in parallel.
