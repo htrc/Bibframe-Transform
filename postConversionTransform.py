@@ -253,7 +253,7 @@ def searchLOC(agent,cursor,connection,match_key,agent_type,search_type,timesheet
 		while i < len(result_table) and match_not_found:
 			authorized_heading = result_table[i].xpath("./td/a/text()")
 			logging.debug(authorized_heading)
-			variant_headings = result_table[i+1].xpath("./td[@colspan='4']/text()")
+			variant_headings = result_table[i+1].xpath("./td[@colspan='5']/text()")
 			logging.debug(variant_headings)
 			if len(variant_headings) > 0:
 				variant_headings = map(normalizeVariant,variant_headings[0].split(';'))
@@ -597,7 +597,10 @@ def setContributionAgent(agent,countries,cursor,connection,timesheet):
 def timeSQLCall(timesheet,timesheet_domain,timed_function,*args):
 	local_start_time = datetime.datetime.now().time()
 
-	timed_function(*args)
+	try:
+		timed_function(*args)
+	except:
+		logging.debug(*args)
 
 	local_end_time = datetime.datetime.now().time()
 	timesheet[timesheet_domain]['calls'] += 1
@@ -766,6 +769,7 @@ def postConversionTransform(file_name):
 		topic_agents = work.xpath("./bf:subject/*[not(self::bf:Agent or self::bf:Temporal)]",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
 		logging.debug(topic_agents)
 		for t_agent in topic_agents:
+			logging.debug(t_agent)
 			setSubjectID(t_agent,'madsrdf',cursor,connection,timesheet)
 
 		logging.debug("Starting Contribution Agents")

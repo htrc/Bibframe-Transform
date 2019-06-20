@@ -46,12 +46,19 @@ def makeOutputFolder(folder_name,counter):
 #	rootdir is either a folder containing JSON files to be converted or XML files to be converted
 def traverseFiles(rootdir):
 	print(rootdir)
+	if rootdir[-1:] == SLASH:
+		rootdir = rootdir[:-1]
 #	rootdir = 'sample_starting_records'
 
+	addURLs = True
 	read_format = 'json'
-	if len(sys.argv) > 2 and sys.argv[2] == '-xml':
-		results_folder_name = rootdir
-		read_format = 'xml'
+	if len(sys.argv) > 2:
+		for i in range(2,len(sys.argv)):
+			if sys.argv[i] == '-xml':
+				results_folder_name = rootdir
+				read_format = 'xml'
+			elif if sys.argv[i] == '--fast':
+				addURLs = False
 	else:
 		results_folder_name = getFolder(rootdir + '_XML_records/')
 
@@ -111,7 +118,8 @@ def traverseFiles(rootdir):
 
 					print("Converted " + name)
 					# Enchance converted BIBFRAME by adding Linked Data URLs
-					postConversionTransform.postConversionTransform(bibf_output_file)
+					if addURLs:
+						postConversionTransform.postConversionTransform(bibf_output_file)
 
 					end_time = datetime.datetime.now().time()
 					print("Start time: " + str(start_time))

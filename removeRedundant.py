@@ -203,6 +203,8 @@ def main():
 	if len(sys.argv) > 2 and sys.argv[2] == '-restart':
 		cursor.execute('TRUNCATE TABLE Record')
 		connection.commit()
+		cursor.execute('TRUNCATE TABLE NonOCLC_Record')
+		connection.commit()
 
 	for root, dirs, files in os.walk(read_folder):
 		for f in files:
@@ -212,7 +214,7 @@ def main():
 				if f == sliced_restart_file:
 					waiting = False
 			
-			if not waiting:
+			if not waiting and f != '.DS_Store':
 				processJSONCollection(read_folder + f,cursor,connection,output_folder + f,os_read,os_write,os_append)
 
 main()
