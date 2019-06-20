@@ -57,7 +57,7 @@ def traverseFiles(rootdir):
 			if sys.argv[i] == '-xml':
 				results_folder_name = rootdir
 				read_format = 'xml'
-			elif if sys.argv[i] == '--fast':
+			elif sys.argv[i] == '--fast':
 				addURLs = False
 	else:
 		results_folder_name = getFolder(rootdir + '_XML_records/')
