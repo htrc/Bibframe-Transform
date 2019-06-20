@@ -59,7 +59,10 @@ def traverseFiles(rootdir):
 				read_format = 'xml'
 			elif sys.argv[i] == '--fast':
 				addURLs = False
-	else:
+
+	try:
+		results_folder_name
+	except NameError:
 		results_folder_name = getFolder(rootdir + '_XML_records/')
 
 	bibf_results_folder_name = getFolder(rootdir + '_BIBF_records/')
