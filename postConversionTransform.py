@@ -5,7 +5,7 @@ from unicodedata import normalize
 from datetime import timedelta
 from mysql.connector import MySQLConnection
 
-logging.basicConfig(level=logging.DEBUG,format='[%(levelname)s] (%(threadName)-10s) %(message)s')
+logging.basicConfig(level=logging.DEBUG,format='%(asctime)s [%(levelname)s] (%(threadName)-10s) %(message)s',datefmt='%H:%M:%S')
 
 # Used in checking responses when no code was received
 class BrokenResponse:
@@ -110,10 +110,10 @@ def getRequest(url,expectJSON,timesheet):
 			splitpoint = url.find('?query=')+7
 			url = url[:splitpoint] + h.unescape(url[splitpoint:])
 			logging.debug(url)
-		except UnicodeDecodeError:
+		except (UnicodeDecodeError, KeyError):
 			h = HTMLParser.HTMLParser()
 			splitpoint = url.find('?query=')+7
-			url = url[:splitpoint] + h.unescape(url[splitpoint:].decode('utf-8'))
+			url = url[:splitpoint] + urllib.quote(h.unescape(url[splitpoint:].decode('utf-8')))
 			logging.debug(url)
 		except:
 			raise
@@ -599,7 +599,9 @@ def timeSQLCall(timesheet,timesheet_domain,timed_function,*args):
 
 	try:
 		timed_function(*args)
-	except:
+	except Exception as e:
+		logging.debug(e)
+		logging.debug(timed_function)
 		logging.debug(*args)
 
 	local_end_time = datetime.datetime.now().time()
@@ -609,6 +611,43 @@ def timeSQLCall(timesheet,timesheet_domain,timed_function,*args):
 		timesheet[timesheet_domain]['time'] += duration
 	else:
 		timesheet[timesheet_domain]['time'] += (timedelta(days=1) + duration)
+
+# Split the processing of the WorldCat data into a separate function so that it can recur on itself when WorldCat returns incomplete data.
+#	Bugs have been occurring where the returned JSON has no exampleOfWork field, so no key-value pair is ever added for the given 
+#	instance_url, but when manually checking that same URL, the field is present, leading me to believe that WorldCat sometimes returns
+#	truncated versions of the JSON-LD file to satisfy the request. This also explains why the problem is intermittent, and not consistently
+#	being caused by the same exceptional instance_urls
+def fetchAndCheckWorldCatResults(instance_url,work_ids,timesheet):
+	result = getRequest(instance_url + '.jsonld',True,timesheet)
+
+	if result:
+		logging.debug("Found WorldCat data for: " + instance_url)
+		logging.debug(len(result.content))
+		try:
+			result = result.json()
+		except:
+			logging.debug("ERROR loading JSON from " + instance_url)
+			logging.debug(result.content)
+			logging.debug(instance_url)
+			logging.debug("Raised error message: " + sys.exec_info()[0])
+		logging.debug(len(result['@graph']))
+
+		found = False
+		for r in result['@graph']:
+			if 'exampleOfWork' in r:
+				found = True
+				if type(r['exampleOfWork']) == list:
+					for element in r['exampleOfWork']:
+						if 'worldcat.org' in element:
+							work_ids[instance_url] = element
+							break
+					logging.debug(result['@graph'])
+				else:
+					work_ids[instance_url] = r['exampleOfWork']
+
+		if not found:
+			logging.debug("WorldCat data lacks exampleOfWork field. Re-querying for JSON-LD.")
+			fetchAndCheckWorldCatResults(instance_url,work_ids,timesheet)
 
 # Looks through all the instances in the file, and uses each unique Instance ID to retrieve a JSON-LD 
 #	from WorldCat. From the JSON-LD, we find the value of 'exampleOfWork' and store it in a dict with the
@@ -635,19 +674,35 @@ def getWorldCatData(root,works,work_ids,timesheet):
 				logging.debug("Already found work " + work_ids[instance_url])
 			except:
 				if 'worldcat.org' in instance_url:
-					result = getRequest(instance_url + '.jsonld',True,timesheet)
-
-					if result:
-						logging.debug(len(result.content))
-						try:
-							result = result.json()
-						except:
-							logging.debug(result.content)
-							logging.debug(instance_url)
-						logging.debug(len(result['@graph']))
-						for r in result['@graph']:
-							if 'exampleOfWork' in r:
-								work_ids[instance_url] = r['exampleOfWork']
+					if instance_url != 'http://www.worldcat.org/oclc/1777743' and instance_url != 'http://www.worldcat.org/oclc/59107942' and instance_url != 'http://www.worldcat.org/oclc/60846344' and instance_url != 'http://www.worldcat.org/oclc/32675216' and instance_url != 'http://www.worldcat.org/oclc/1868259':
+						fetchAndCheckWorldCatResults(instance_url,work_ids,timesheet)
+#					result = getRequest(instance_url + '.jsonld',True,timesheet)
+#
+#					if result:
+#						logging.debug("Found WorldCat data for: " + instance_url)
+#						logging.debug(len(result.content))
+#						try:
+#							result = result.json()
+#						except:
+#							logging.debug("ERROR loading JSON from " + instance_url)
+#							logging.debug(result.content)
+#							logging.debug(instance_url)
+#							logging.debug("Raised error message: " + sys.exec_info()[0])
+#						logging.debug(len(result['@graph']))
+#
+#						found = False
+#						for r in result['@graph']:
+#							if 'exampleOfWork' in r:
+#								found = True
+#								if type(r['exampleOfWork']) == list:
+#									logging.debug(result['@graph'])
+#									sys.exit()
+#								else:
+#									work_ids[instance_url] = r['exampleOfWork']
+#
+#						if not found:
+#							logging.debug(result['@graph'])
+#							logging.debug(instance_url)
 
 				try:
 					logging.debug(work_ids[instance_url])
@@ -655,6 +710,8 @@ def getWorldCatData(root,works,work_ids,timesheet):
 					logging.debug("New instance " + instance_url)
 					work_ids[instance_url] = convertFillerURI(instance_url)
 					logging.debug("New work " + work_ids[instance_url])
+
+	logging.debug(instance_urls)
 
 # Every record is represented by a Work/Instance/Item structure. This code adds relevant URLs to the Work 
 # 	and Instance for each record. There are three kinds of URLs added:
@@ -746,11 +803,30 @@ def postConversionTransform(file_name):
 				work_id = work_ids[instance_url]
 				waiting_for_worldcat_record = False
 			except:
-				logging.debug("Waiting to load worldcat record " + instance_url)
-				if instance_url == 'http://www.worldcat.org/oclc/78446227':
-					logging.debug(work_ids[instance_url])
+				if worldcat_thread.isAlive():
+					logging.debug("Waiting to load worldcat record " + instance_url)
+					time.sleep(6)
+				else:
+					logging.debug(work_ids)
+					logging.debug(instance_url)
 					sys.exit()
-				time.sleep(6)
+
+				#For detecting what's going wrong when we can't seem to load a record from WorldCat for an extended period of time. Does that instance_url not actually exists in the dict?
+#				temp_duration = datetime.datetime.combine(datetime.date.min,datetime.datetime.now().time())-datetime.datetime.combine(datetime.date.min,local_start_time)
+#				if temp_duration < timedelta(0):
+#					temp_duration += timedelta(days=1)
+
+#				if temp_duration > timedelta(minutes=30):
+#					print(work_ids)
+#					print(instance_url)
+#					print(worldcat_thread.isAlive())
+#					sys.exit()
+
+#				if instance_url == 'http://www.worldcat.org/oclc/78446227':
+#					logging.debug(work_ids[instance_url])
+#					sys.exit()
+
+#				time.sleep(6)
 		logging.debug(work_ids[instance_url])
 		local_end_time = datetime.datetime.now().time()
 		duration = datetime.datetime.combine(datetime.date.min,local_end_time)-datetime.datetime.combine(datetime.date.min,local_start_time)
@@ -791,16 +867,16 @@ def postConversionTransform(file_name):
 
 	example_agents = root.xpath(".//*[contains(@*,'example.org')]")
 	logging.debug("Number of example.org urls converted: " + str(len(example_agents)))
-	for e_a in example_agents:
-		logging.debug(e_a)
-		logging.debug(e_a.xpath('@*')[0])
-		logging.debug(e_a.xpath('name(@*[1])'))
-		logging.debug(convertFillerURI(e_a.xpath('@*')[0]))
-		blank_node = convertFillerURI(e_a.xpath('@*')[0])
-		full_attribute_name = e_a.xpath('name(@*[1])')
-		logging.debug('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}' + full_attribute_name[full_attribute_name.rfind(':')+1:])
-		e_a.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}' + full_attribute_name[full_attribute_name.rfind(':')+1:],blank_node)
-		logging.debug(e_a.xpath('@*')[0])
+#	for e_a in example_agents:
+#		logging.debug(e_a)
+#		logging.debug(e_a.xpath('@*')[0])
+#		logging.debug(e_a.xpath('name(@*[1])'))
+#		logging.debug(convertFillerURI(e_a.xpath('@*')[0]))
+#		blank_node = convertFillerURI(e_a.xpath('@*')[0])
+#		full_attribute_name = e_a.xpath('name(@*[1])')
+#		logging.debug('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}' + full_attribute_name[full_attribute_name.rfind(':')+1:])
+#		e_a.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}' + full_attribute_name[full_attribute_name.rfind(':')+1:],blank_node)
+#		logging.debug(e_a.xpath('@*')[0])
 
 	with open(file_name,'w') as outfile:
 		outfile.write(etree.tostring(tree))

@@ -1,6 +1,13 @@
 .DS_Store
 test_input.txt
 two_oclc.xml
+findLanguages.py
+find856ind2is2.py
+language_mapping.json
+ef2_lang_dist.tsv
+readSample.py
+BIBF_google_segment*
+uiug.*
 viaf_index*
 *.pyc
 *.zip
@@ -36,5 +43,7 @@ viaf_index*
 /bibframe2ef/framing-compacting-example*
 /ic_az*
 /null_sample*
-/2019061*
+/201906*
 /trimmed_*
+/lang_errors*
+/m2b2_*
