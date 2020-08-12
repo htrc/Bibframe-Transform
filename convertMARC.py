@@ -51,6 +51,7 @@ def traverseFiles(rootdir):
 #	rootdir = 'sample_starting_records'
 
 	addURLs = True
+	dummyURLs = False
 	read_format = 'json'
 	if len(sys.argv) > 2:
 		for i in range(2,len(sys.argv)):
@@ -59,6 +60,8 @@ def traverseFiles(rootdir):
 				read_format = 'xml'
 			elif sys.argv[i] == '--fast':
 				addURLs = False
+			elif sys.argv[i] = '--dummy':
+				dummyURLs = True
 
 	try:
 		results_folder_name
@@ -122,7 +125,7 @@ def traverseFiles(rootdir):
 					print("Converted " + name)
 					# Enchance converted BIBFRAME by adding Linked Data URLs
 					if addURLs:
-						postConversionTransform.postConversionTransform(bibf_output_file)
+						postConversionTransform.postConversionTransform(bibf_output_file,dummyURLs)
 
 					end_time = datetime.datetime.now().time()
 					print("Start time: " + str(start_time))

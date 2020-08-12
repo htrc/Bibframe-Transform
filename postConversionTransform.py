@@ -18,6 +18,27 @@ def sanitizeMatchString(match_string):
 	else:
 		return sanitizeMatchString(match_string[:-1])
 
+def generateDummyURL(match_string,agent,mode):
+	if mode == 'person':
+		prefix = 'http://catalogdata.library.illinois.edu/lod/entities/ContributionAgent/Person/ht/'
+	elif mode == 'subject':
+		prefix = 'http://catalogdata.library.illinois.edu/lod/entities/SubjectAgent/Subject/ht/'
+	elif mode == 'genre':
+		prefix = 'http://catalogdata.library.illinois.edu/lod/entities/GenreForm/ht/'
+	else:
+		prefix = 'http://catalogdata.library.illinois.edu/lod/entities/ht/'
+
+	try:
+		if match_string:
+			dummy_url = prefix + urllib.quote_plus(match_string)
+		else:
+			dummy_url = prefix + str(uuid.uuid1().int)
+	except:
+		dummy_url = prefix + str(uuid.uuid1().int)
+
+	agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',dummy_url)
+	return dummy_url	
+
 # When a proper id can't be found, we generate our own for internal use based on what was already being used. 
 #	Often, this is converting an example.org ID or Instance ID into something more useful. We can generate a 
 #	useful, reusable id for persons and subjects, but outside of that, we generate a blank node. Most of this
@@ -237,7 +258,7 @@ def getAgentTypes(agent_types,target_domain):
 #	database would require a unique query to be sent to LOC for each item in the list, and each result would have
 #	to be similiarly parsed. This seems like a lot of work for relatively little gain, so I wouldn't prioritize
 #	replacing this functionality. As long as the ComplexSubject has an ID that should be good enough.
-def searchLOC(agent,cursor,connection,match_key,agent_type,search_type,timesheet):
+def searchLOC(agent,cursor,connection,match_key,agent_type,search_type,timesheet,bypass=False):
 	timesheet_domain = 'loc_db'
 	BASE_LC_URL = 'https://id.loc.gov/search/?q='
 
@@ -246,99 +267,104 @@ def searchLOC(agent,cursor,connection,match_key,agent_type,search_type,timesheet
 
 	match_not_found = True
 
-	try:
-		results_tree = etree.HTML(getRequest(query_url,False,timesheet).content)
-		result_table = results_tree.xpath("//table[@class='id-std']/tbody/tr")
-		i = 0
-		while i < len(result_table) and match_not_found:
-			authorized_heading = result_table[i].xpath("./td/a/text()")
-			logging.debug(authorized_heading)
-			variant_headings = result_table[i+1].xpath("./td[@colspan='5']/text()")
-			logging.debug(variant_headings)
-			if len(variant_headings) > 0:
-				variant_headings = map(normalizeVariant,variant_headings[0].split(';'))
-			logging.debug(variant_headings)
-			logging.debug(match_key, authorized_heading[0])
-			logging.debug(match_key == authorized_heading[0])
-
-			if match_key in authorized_heading or match_key in variant_headings:
-				logging.debug("Found " + match_key)
-				subject_uri = 'http://id.loc.gov' + result_table[i].xpath("./td/a/@href")[0]
-				logging.debug(subject_uri)
-				agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',subject_uri)
-				match_not_found = False
-
-				timeSQLCall(timesheet,timesheet_domain,cursor.execute,u'SELECT * FROM Subject WHERE url = %s',(subject_uri,))
-				if not cursor.rowcount:
-					add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
-					subject_data = (subject_uri,authorized_heading[0].encode('utf-8'),'http://www.loc.gov/mads/rdf/v1#' + agent_type)
-					logging.debug(subject_data)
-					logging.debug(type(subject_uri))
-					logging.debug(type(authorized_heading[0].encode('utf-8')))
-					logging.debug(type('http://www.loc.gov/mads/rdf/v1#' + agent_type))
-
-					timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_subject,subject_data)
-					timeSQLCall(timesheet,timesheet_domain,connection.commit)
-				else:
-					timeSQLCall(timesheet,timesheet_domain,cursor.execute,u'INSERT INTO Variant_Name (url, variant_name) VALUES (%s, %s)',(subject_uri,authorized_heading[0].encode('utf-8')))
-					timeSQLCall(timesheet,timesheet_domain,connection.commit)
-
-				add_variant_name = u'INSERT INTO Variant_Name (url, variant_name) VALUES (%s, %s)'
-				for variant in variant_headings:
-					variant_data = (subject_uri,variant)
-					logging.debug(variant_data)
-
-					timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_variant_name,variant_data)
-					timeSQLCall(timesheet,timesheet_domain,connection.commit)
-
-				if agent_type == 'ComplexSubject' and match_key in authorized_heading:
-					components_uri = subject_uri + '.madsrdf.rdf'
-					logging.debug(components_uri)
-
-					component_tree = etree.fromstring(getRequest(components_uri,False,timesheet).content)
-					component_list = component_tree.xpath("/rdf:RDF/madsrdf:ComplexSubject/madsrdf:componentList/*",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
-					logging.debug("Component List:")
-					logging.debug(component_list)
-
-					output_component_list = agent.xpath("./madsrdf:componentList/*",namespaces={ "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
-					logging.debug("Output Component List:")
-					logging.debug(output_component_list)
-
-					add_component = u'INSERT INTO Component (source_url, sequence_value, component_url) VALUES (%s, %s, %s)'
-
-					j = 0
-					while j < len(component_list):
-						component_url = component_list[j].xpath("./@rdf:about",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
-						if component_url:
-							timeSQLCall(timesheet,timesheet_domain,cursor.execute,'SELECT * FROM Component WHERE source_url = %s',(subject_uri,))
-							if not cursor.rowcount:
-								component_data = (subject_uri,j,component_url[0].encode('utf-8'))
-								logging.debug(component_data)
-								logging.debug(type(subject_uri))
-								logging.debug(type(j))
-								logging.debug(type(component_url[0].encode('utf-8')))
-
-								timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_component,component_data)
-								timeSQLCall(timesheet,timesheet_domain,connection.commit)
-
-							output_component_list[j].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',component_url[0])
-						j = j + 1
-			i = i + 2
-	except:
-		pass
-
-	if match_not_found:
-		new_blank_node = createBlankNode(agent,'subject')
-		add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
-		logging.debug(new_blank_node)
+	if bypass:
+		dummy_url = generateDummyURL(match_key,agent,'subject')
+		logging.debug(dummy_url)
 		logging.debug(match_key)
-		subject_data = (new_blank_node,match_key,'http://www.loc.gov/mads/rdf/v1#' + agent_type)
+	else:
+		try:
+			results_tree = etree.HTML(getRequest(query_url,False,timesheet).content)
+			result_table = results_tree.xpath("//table[@class='id-std']/tbody/tr")
+			i = 0
+			while i < len(result_table) and match_not_found:
+				authorized_heading = result_table[i].xpath("./td/a/text()")
+				logging.debug(authorized_heading)
+				variant_headings = result_table[i+1].xpath("./td[@colspan='5']/text()")
+				logging.debug(variant_headings)
+				if len(variant_headings) > 0:
+					variant_headings = map(normalizeVariant,variant_headings[0].split(';'))
+				logging.debug(variant_headings)
+				logging.debug(match_key, authorized_heading[0])
+				logging.debug(match_key == authorized_heading[0])
 
-		timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_subject,subject_data)
-		timeSQLCall(timesheet,timesheet_domain,connection.commit)
+				if match_key in authorized_heading or match_key in variant_headings:
+					logging.debug("Found " + match_key)
+					subject_uri = 'http://id.loc.gov' + result_table[i].xpath("./td/a/@href")[0]
+					logging.debug(subject_uri)
+					agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',subject_uri)
+					match_not_found = False
+
+					timeSQLCall(timesheet,timesheet_domain,cursor.execute,u'SELECT * FROM Subject WHERE url = %s',(subject_uri,))
+					if not cursor.rowcount:
+						add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
+						subject_data = (subject_uri,authorized_heading[0].encode('utf-8'),'http://www.loc.gov/mads/rdf/v1#' + agent_type)
+						logging.debug(subject_data)
+						logging.debug(type(subject_uri))
+						logging.debug(type(authorized_heading[0].encode('utf-8')))
+						logging.debug(type('http://www.loc.gov/mads/rdf/v1#' + agent_type))
+
+						timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_subject,subject_data)
+						timeSQLCall(timesheet,timesheet_domain,connection.commit)
+					else:
+						timeSQLCall(timesheet,timesheet_domain,cursor.execute,u'INSERT INTO Variant_Name (url, variant_name) VALUES (%s, %s)',(subject_uri,authorized_heading[0].encode('utf-8')))
+						timeSQLCall(timesheet,timesheet_domain,connection.commit)
+
+					add_variant_name = u'INSERT INTO Variant_Name (url, variant_name) VALUES (%s, %s)'
+					for variant in variant_headings:
+						variant_data = (subject_uri,variant)
+						logging.debug(variant_data)
+
+						timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_variant_name,variant_data)
+						timeSQLCall(timesheet,timesheet_domain,connection.commit)
+
+					if agent_type == 'ComplexSubject' and match_key in authorized_heading:
+						components_uri = subject_uri + '.madsrdf.rdf'
+						logging.debug(components_uri)
+
+						component_tree = etree.fromstring(getRequest(components_uri,False,timesheet).content)
+						component_list = component_tree.xpath("/rdf:RDF/madsrdf:ComplexSubject/madsrdf:componentList/*",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
+						logging.debug("Component List:")
+						logging.debug(component_list)
+
+						output_component_list = agent.xpath("./madsrdf:componentList/*",namespaces={ "madsrdf": "http://www.loc.gov/mads/rdf/v1#" })
+						logging.debug("Output Component List:")
+						logging.debug(output_component_list)
+
+						add_component = u'INSERT INTO Component (source_url, sequence_value, component_url) VALUES (%s, %s, %s)'
+
+						j = 0
+						while j < len(component_list):
+							component_url = component_list[j].xpath("./@rdf:about",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
+							if component_url:
+								timeSQLCall(timesheet,timesheet_domain,cursor.execute,'SELECT * FROM Component WHERE source_url = %s',(subject_uri,))
+								if not cursor.rowcount:
+									component_data = (subject_uri,j,component_url[0].encode('utf-8'))
+									logging.debug(component_data)
+									logging.debug(type(subject_uri))
+									logging.debug(type(j))
+									logging.debug(type(component_url[0].encode('utf-8')))
+
+									timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_component,component_data)
+									timeSQLCall(timesheet,timesheet_domain,connection.commit)
+
+								output_component_list[j].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',component_url[0])
+							j = j + 1
+				i = i + 2
+		except:
+			pass
+
+		if match_not_found:
+			new_blank_node = createBlankNode(agent,'subject')
+			add_subject = u'INSERT INTO Subject (url, label, concept_type) VALUES (%s, %s, %s)'
+			logging.debug(new_blank_node)
+			logging.debug(match_key)
+			subject_data = (new_blank_node,match_key,'http://www.loc.gov/mads/rdf/v1#' + agent_type)
+
+			timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_subject,subject_data)
+			timeSQLCall(timesheet,timesheet_domain,connection.commit)
 
 # Look for the subject in local databases. If not present, call searchLOC() to call out to LOC.
-def getLOCID(agent,cursor,connection,match_key,agent_type,search_type,timesheet):
+def getLOCID(agent,cursor,connection,match_key,agent_type,search_type,timesheet,bypass=False):
 # START Database queries block
 	timesheet_domain = 'loc_db'
 
@@ -348,19 +374,20 @@ def getLOCID(agent,cursor,connection,match_key,agent_type,search_type,timesheet)
 	logging.debug(match_key)
 	logging.debug('http://www.loc.gov/mads/rdf/v1#' + agent_type)
 
-	timeSQLCall(timesheet,timesheet_domain,cursor.execute,'SELECT * FROM Subject USE INDEX (by_label) WHERE label = %s AND concept_type = %s',(match_key, 'http://www.loc.gov/mads/rdf/v1#' + agent_type))
-	for table in cursor:
-		logging.debug(table[0])
-		loc_url = table[0]
-		agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',loc_url)
-		found_loc_url = True
-
-	if not found_loc_url:
-		timeSQLCall(timesheet,timesheet_domain,cursor.execute,'SELECT * FROM Variant_Name USE INDEX (names) WHERE variant_name = %s',(match_key,))
+	if not bypass:
+		timeSQLCall(timesheet,timesheet_domain,cursor.execute,'SELECT * FROM Subject USE INDEX (by_label) WHERE label = %s AND concept_type = %s',(match_key, 'http://www.loc.gov/mads/rdf/v1#' + agent_type))
 		for table in cursor:
+			logging.debug(table[0])
 			loc_url = table[0]
 			agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',loc_url)
 			found_loc_url = True
+
+		if not found_loc_url:
+			timeSQLCall(timesheet,timesheet_domain,cursor.execute,'SELECT * FROM Variant_Name USE INDEX (names) WHERE variant_name = %s',(match_key,))
+			for table in cursor:
+				loc_url = table[0]
+				agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',loc_url)
+				found_loc_url = True
 
 	if found_loc_url:
 		if agent_type == 'ComplexSubject':
@@ -376,14 +403,14 @@ def getLOCID(agent,cursor,connection,match_key,agent_type,search_type,timesheet)
 						output_component_list[table[1]].set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',table[2])
 # END Database queries block
 	else:
-		searchLOC(agent,cursor,connection,match_key,agent_type,search_type,timesheet)
+		searchLOC(agent,cursor,connection,match_key,agent_type,search_type,timesheet,bypass)
 
 # Search id.loc.gov for an exact subject match, assign the url of that subject to @rdf:about. Call getAgentTypes(), just
 #	like in setContributionAgent(). This time the prefix used to find the text string for the agent is set when calling this
 #	function, depending on if it is a bf:subject/bf:Agent or some other kind of bf:subject. The text is cleaned up and
 #	passed into getLOCID() to actually query LOC/local databases. If we don't find a strint to use in the query,
 #	we generate an ID for internal use only.
-def setSubjectID(agent,prefix,cursor,connection,timesheet):
+def setSubjectID(agent,prefix,cursor,connection,timesheet,bypass=False):
 	timesheet_domain = 'loc_db'
 
 	if prefix == 'bflc':
@@ -415,7 +442,7 @@ def setSubjectID(agent,prefix,cursor,connection,timesheet):
 			if len(match_key) > 200:
 				match_key = shortenMatchKey(agent,match_key,match_key_type,prefix,prefix_url)
 
-			getLOCID(agent,cursor,connection,match_key,agent_type,search_type,timesheet)
+			getLOCID(agent,cursor,connection,match_key,agent_type,search_type,timesheet,bypass)
 		else:
 			new_blank_node = createBlankNode(agent,'subject')
 
@@ -466,7 +493,7 @@ def shortenMatchKey(agent,match_key,match_key_type,namespace,namespace_value):
 #	on encoding. We then call VIAF with the string and check that the reults are equal, have the correct type 
 #	and have a VIAF id. If all that is true, we set the Agent's about value to the VIAF URL. If nothing is found 
 #	we build a URL for internal use only.
-def setContributionAgent(agent,countries,cursor,connection,timesheet):
+def setContributionAgent(agent,countries,cursor,connection,timesheet,bypass=False):
 	timesheet_domain = 'viaf_db'
 
 	agent_types = agent.xpath("./rdf:type/@rdf:resource",namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })
@@ -496,100 +523,110 @@ def setContributionAgent(agent,countries,cursor,connection,timesheet):
 			if match_key in countries:
 				agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',countries[match_key])
 			else:
-# START Database queries block
-				found_agent_url = False
-				found_agent_authorized = False
-				found_authorized_count = 0
-				agent_url = None
-
-				find_name_in_found = u'SELECT url FROM found_names WHERE label = %s AND type = %s'
-				timeSQLCall(timesheet,timesheet_domain,cursor.execute,find_name_in_found,(match_key,agent_type))
-				if cursor.rowcount != 0:
-					found_agent_url = True
-					rows = cursor.fetchall()
-					agent_url = rows[0][0]
-
-				if found_agent_url:
-					agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',agent_url)
+				if bypass:
+					dummy_url = generateDummyURL(match_key,agent,'person')
+					logging.debug(dummy_url)
+					logging.debug(match_key)
 				else:
-					find_name_in_stored = u'SELECT * FROM stored_names WHERE label = %s AND type = %s LIMIT 100'
+# START Database queries block
+					found_agent_url = False
+					found_agent_authorized = False
+					found_authorized_count = 0
+					agent_url = None
 
-					timeSQLCall(timesheet,timesheet_domain,cursor.execute,find_name_in_stored,(match_key,agent_type))
+					find_name_in_found = u'SELECT url FROM found_names WHERE label = %s AND type = %s'
+					timeSQLCall(timesheet,timesheet_domain,cursor.execute,find_name_in_found,(match_key,agent_type))
+					if cursor.rowcount != 0:
+						found_agent_url = True
+						rows = cursor.fetchall()
+						agent_url = rows[0][0]
 
-					#If only one authorized agent, choose that; if zero authorized agents, search; if more than one authorized agent, mint a new uri
-					for table in cursor:
-						if table[2] == 'authorized':
-							found_authorized_count = 1 + found_authorized_count
-
-							if not found_agent_authorized:
-								agent_url = table[1]
-								found_agent_url = True
-
-							found_agent_authorized = True
-
-						if not found_agent_url:
-							found_agent_url = True
-							agent_url = table[1]
-
-					if found_agent_url and found_authorized_count == 1:
+					if found_agent_url:
 						agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',agent_url)
-					elif found_authorized_count > 1:
-						new_uri = createBlankNode(agent,'person')
-						add_name = u'INSERT INTO found_names (label, url, type) VALUES (%s, %s, %s)'
-						name_data = (match_key,new_uri,agent_type)
-
-						timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_name,name_data)
-						timeSQLCall(timesheet,timesheet_domain,connection.commit)
 					else:
-# END Database queries block
-						BASE_VIAF_URL = 'http://www.viaf.org/viaf/AutoSuggest?query='
-						query_url = BASE_VIAF_URL + match_key.replace('"',"'")
-						results = getRequest(query_url,True,timesheet).content
-						logging.debug(match_key)
-						logging.debug(query_url)
-						logging.debug(results)
+						find_name_in_stored = u'SELECT * FROM stored_names WHERE label = %s AND type = %s LIMIT 100'
 
-						match_not_found = True
+						timeSQLCall(timesheet,timesheet_domain,cursor.execute,find_name_in_stored,(match_key,agent_type))
 
-						try:
-							results_dict = json.loads(results)
-							logging.debug(results_dict)
-							if results_dict['result']:
-								i = 0
-								while i < len(results_dict['result']) and match_not_found:
-									logging.debug(results_dict['result'][i]['term'] == match_key.decode('utf-8'))
-									logging.debug(results_dict['result'][i]['term'])
-									logging.debug(match_key)
-									logging.debug(sanitizeMatchString(normalize('NFC',results_dict['result'][i]['term'])) == normalize('NFC',match_key.decode('utf-8')))
-									if results_dict['result'][i]['nametype'] == agent_type and sanitizeMatchString(normalize('NFC',results_dict['result'][i]['term'])) == normalize('NFC',match_key.decode('utf-8')) and 'viafid' in results_dict['result'][i]:
-										logging.debug("Found " + match_key)
-										agent_uri = "http://www.viaf.org/viaf/" + results_dict['result'][i]['viafid']
-										logging.debug(agent_uri)
-										agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',agent_uri)
-										match_not_found = False
-										logging.debug(agent_type)
+						#If only one authorized agent, choose that; if zero authorized agents, search; if more than one authorized agent, mint a new uri
+						for table in cursor:
+							if table[2] == 'authorized':
+								found_authorized_count = 1 + found_authorized_count
 
-										add_name = u'INSERT INTO found_names (label, url, type) VALUES (%s, %s, %s)'
-										name_data = (match_key,agent_uri,agent_type)
+								if not found_agent_authorized:
+									agent_url = table[1]
+									found_agent_url = True
 
-										timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_name,name_data)
-										timeSQLCall(timesheet,timesheet_domain,connection.commit)
+								found_agent_authorized = True
 
-									i = i + 1
-						except:
-							pass
+							if not found_agent_url:
+								found_agent_url = True
+								agent_url = table[1]
 
-						if match_not_found:
+						if found_agent_url and found_authorized_count == 1:
+							agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',agent_url)
+						elif found_authorized_count > 1:
 							new_uri = createBlankNode(agent,'person')
 							add_name = u'INSERT INTO found_names (label, url, type) VALUES (%s, %s, %s)'
-							logging.debug(match_key)
 							name_data = (match_key,new_uri,agent_type)
-							logging.debug(name_data)
 
 							timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_name,name_data)
 							timeSQLCall(timesheet,timesheet_domain,connection.commit)
+						else:
+	# END Database queries block
+							BASE_VIAF_URL = 'http://www.viaf.org/viaf/AutoSuggest?query='
+							query_url = BASE_VIAF_URL + match_key.replace('"',"'")
+							results = getRequest(query_url,True,timesheet).content
+							logging.debug(match_key)
+							logging.debug(query_url)
+							logging.debug(results)
+
+							match_not_found = True
+
+							try:
+								results_dict = json.loads(results)
+								logging.debug(results_dict)
+								if results_dict['result']:
+									i = 0
+									while i < len(results_dict['result']) and match_not_found:
+										logging.debug(results_dict['result'][i]['term'] == match_key.decode('utf-8'))
+										logging.debug(results_dict['result'][i]['term'])
+										logging.debug(match_key)
+										logging.debug(sanitizeMatchString(normalize('NFC',results_dict['result'][i]['term'])) == normalize('NFC',match_key.decode('utf-8')))
+										if results_dict['result'][i]['nametype'] == agent_type and sanitizeMatchString(normalize('NFC',results_dict['result'][i]['term'])) == normalize('NFC',match_key.decode('utf-8')) and 'viafid' in results_dict['result'][i]:
+											logging.debug("Found " + match_key)
+											agent_uri = "http://www.viaf.org/viaf/" + results_dict['result'][i]['viafid']
+											logging.debug(agent_uri)
+											agent.set('{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about',agent_uri)
+											match_not_found = False
+											logging.debug(agent_type)
+
+											add_name = u'INSERT INTO found_names (label, url, type) VALUES (%s, %s, %s)'
+											name_data = (match_key,agent_uri,agent_type)
+
+											timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_name,name_data)
+											timeSQLCall(timesheet,timesheet_domain,connection.commit)
+
+										i = i + 1
+							except:
+								pass
+
+							if match_not_found:
+								new_uri = createBlankNode(agent,'person')
+								add_name = u'INSERT INTO found_names (label, url, type) VALUES (%s, %s, %s)'
+								logging.debug(match_key)
+								name_data = (match_key,new_uri,agent_type)
+								logging.debug(name_data)
+
+								timeSQLCall(timesheet,timesheet_domain,cursor.execute,add_name,name_data)
+								timeSQLCall(timesheet,timesheet_domain,connection.commit)
 		else:
-			createBlankNode(agent)
+			if bypass:
+				dummy_url = generateDummyURL(None,agent,'person')
+				logging.debug(dummy_url)
+				logging.debug(match_key)
+			else:
+				createBlankNode(agent)
 
 	logging.debug('^-CONTRIBUTION AGENT--CONTRIBUTION AGENT--CONTRIBUTION AGENT--CONTRIBUTION AGENT-^')
 
@@ -636,14 +673,19 @@ def fetchAndCheckWorldCatResults(instance_url,work_ids,timesheet):
 		for r in result['@graph']:
 			if 'exampleOfWork' in r:
 				found = True
-				if type(r['exampleOfWork']) == list:
-					for element in r['exampleOfWork']:
-						if 'worldcat.org' in element:
-							work_ids[instance_url] = element
-							break
-					logging.debug(result['@graph'])
+				if r['@id'] == instance_url:
+					if type(r['exampleOfWork']) == list:
+						for element in r['exampleOfWork']:
+							if 'worldcat.org' in element:
+								work_ids[instance_url] = element
+								break
+						logging.debug(result['@graph'])
+					else:
+						work_ids[instance_url] = r['exampleOfWork']
 				else:
-					work_ids[instance_url] = r['exampleOfWork']
+					logging.debug("@id does not match Instance URL.")
+					return found
+
 
 		if not found:
 			logging.debug("WorldCat data lacks exampleOfWork field. Re-querying for JSON-LD.")
@@ -735,7 +777,7 @@ def getWorldCatData(root,works,work_ids,timesheet):
 #	Subject Agents, Topic Agents, Contribution Agents. This seems like a good place for parallelism. While obviously 
 #	each Work can be processed in parallel, none of these groups are actually dependent on each other, so they could 
 #	also be processed in parallel.
-def postConversionTransform(file_name):
+def postConversionTransform(file_name,bypass=False):
 	start_time = datetime.datetime.now().time()
 
 	with open('viaf_countries.json','r') as readfile:
@@ -792,6 +834,8 @@ def postConversionTransform(file_name):
 		logging.debug('V-WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK--WORK-V')
 		placeholder_work_id = work.xpath("./@rdf:about", namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })[0]
 		instances = root.xpath("/rdf:RDF/bf:Instance[bf:instanceOf/@rdf:resource='" + placeholder_work_id + "']", namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "bf": "http://id.loc.gov/ontologies/bibframe/" })
+		logging.debug(placeholder_work_id)
+		logging.debug(instances)
 		instance_url = instances[0].xpath("@rdf:about", namespaces={ "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#" })[0]
 
 		logging.debug(instance_url)
@@ -839,20 +883,20 @@ def postConversionTransform(file_name):
 
 		subject_agents = work.xpath("./bf:subject/bf:Agent",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
 		for agent in subject_agents:
-			setSubjectID(agent,'bflc',cursor,connection,timesheet)
+			setSubjectID(agent,'bflc',cursor,connection,timesheet,bypass)
 
 		logging.debug("Starting Topics")
 		topic_agents = work.xpath("./bf:subject/*[not(self::bf:Agent or self::bf:Temporal)]",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
 		logging.debug(topic_agents)
 		for t_agent in topic_agents:
 			logging.debug(t_agent)
-			setSubjectID(t_agent,'madsrdf',cursor,connection,timesheet)
+			setSubjectID(t_agent,'madsrdf',cursor,connection,timesheet,bypass)
 
 		logging.debug("Starting Contribution Agents")
 		contribution_agents = work.xpath("./bf:contribution/bf:Contribution/bf:agent/bf:Agent",namespaces={ "bf": "http://id.loc.gov/ontologies/bibframe/" })
 		logging.debug(contribution_agents)
 		for c_agent in contribution_agents:
-			setContributionAgent(c_agent,countries,names_cursor,names_connection,timesheet)
+			setContributionAgent(c_agent,countries,names_cursor,names_connection,timesheet,bypass)
 
 		work_end_time = datetime.datetime.now().time()
 		work_duration = datetime.datetime.combine(datetime.date.min,work_end_time)-datetime.datetime.combine(datetime.date.min,work_start_time)
